@@ -7,18 +7,19 @@
 
 ## 🖼️ 部分效果预览
 
-| 黑夜童话圣诞树 (`Turtle`) | 3D 跳动粒子爱心 (`Tkinter`) | 草莓熊手持玫瑰 (`Turtle`) | 烟花凝聚文字 (`Canvas`) |
+| 冰蓝流光星尘凤凰 (`Volumetric`) | 黑夜童话圣诞树 (`Turtle`) | 3D 跳动粒子爱心 (`Tkinter`) | 草莓熊手持玫瑰 (`Turtle`) |
 | :---: | :---: | :---: | :---: |
-| ![黑夜圣诞树](assets/previews/night_decorated_tree.png) | ![粒子爱心](assets/previews/beating_particle_heart.jpg) | ![草莓熊](assets/previews/lotso_bear_rose.png) | ![烟花文字](assets/previews/firework_text.png) |
+| ![冰蓝流光星尘凤凰](assets/previews/celestial_phoenix.png) | ![黑夜圣诞树](assets/previews/night_decorated_tree.png) | ![粒子爱心](assets/previews/beating_particle_heart.jpg) | ![草莓熊](assets/previews/lotso_bear_rose.png) |
 
 ---
 
-## 📂 作品目录（共 17 个精选与原创展示）
+## 📂 作品目录（共 18 个精选与原创展示）
 
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点说明 |
 | :--- | :--- | :--- |
 | **展厅总览主页** | [`index.html`](index.html) | 暗黑毛玻璃作品墙，支持分类筛选与弹窗实时交互预览 |
+| **冰蓝金羽·流光星尘凤凰** *(镇馆原创)* | [`web/celestial-phoenix/index.html`](web/celestial-phoenix/index.html) | 3/4 航拍双翼多层飞羽骨骼动力学 + 16 条流体丝绸长尾焦散辉光 + 流金星尘与代码暗纹切换 |
 | **3D 流光螺旋粒子圣诞树** *(原创)* | [`web/3d-spiral-tree/index.html`](web/3d-spiral-tree/index.html) | 3D 透视投影螺旋粒子树 + 飘雪 + 鼠标拖拽旋转 + 3 套主题切换 |
 | **极光流体引力星云** *(原创)* | [`web/aurora-cosmos/index.html`](web/aurora-cosmos/index.html) | 1500+ 发光粒子流体向量场，支持鼠标漩涡牵引与点击冲击波换色 |
 | **烟花绽放凝聚文字** | [`web/firework-text/index.html`](web/firework-text/index.html) | 烟花升空爆炸后粒子自动寻路汇聚成字，支持 `?text=自定义内容` |

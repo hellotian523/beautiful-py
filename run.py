@@ -28,6 +28,7 @@ PYTHON_DEMOS = [
 
 WEB_DEMOS = [
     ("在线视觉展厅总览 (Gallery Hub)", "index.html"),
+    ("冰蓝金羽·流光星尘凤凰 [镇馆原创/Volumetric Canvas]", "web/celestial-phoenix/index.html"),
     ("3D 流光旋转粒子圣诞树 [原创/Canvas]", "web/3d-spiral-tree/index.html"),
     ("极光流体引力星云 [原创/Canvas]", "web/aurora-cosmos/index.html"),
     ("烟花绽放凝聚文字 [Canvas]", "web/firework-text/index.html"),

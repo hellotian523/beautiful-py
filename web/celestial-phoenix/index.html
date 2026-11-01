@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>冰蓝流光星尘凤凰 — Celestial Ice-Gold Phoenix</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #03060e;
+      font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+      user-select: none;
+    }
+    canvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
+    .hud {
+      position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center;
+      padding: 7px 14px; border-radius: 999px;
+      background: rgba(7, 13, 28, 0.64);
+      border: 1px solid rgba(125, 211, 252, 0.2);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+    .hud button {
+      background: rgba(26, 42, 74, 0.55);
+      color: #dbeafe;
+      border: 1px solid rgba(147, 197, 253, 0.2);
+      padding: 5px 13px; border-radius: 999px;
+      font-size: 12.5px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .hud button:hover, .hud button.active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.88), rgba(245, 182, 66, 0.88));
+      color: #04101f; font-weight: 600; border-color: transparent;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
+    }
+    .hint {
+      position: fixed; top: 16px; left: 22px;
+      color: rgba(186, 230, 253, 0.6); font-size: 12.5px; letter-spacing: 0.04em;
+      pointer-events: none; z-index: 10;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.85);
+    }
+  </style>
+</head>
+<body>
+  <div class="hint">✨ 移动鼠标牵引凤凰翱翔 · 点击绽放流金星尘</div>
+  <div class="hud">
+    <button class="active" data-theme="0">❄️ 冰蓝金羽</button>
+    <button data-theme="1">🔥 涅槃赤金</button>
+    <button data-theme="2">🔮 紫微星云</button>
+    <button id="toggleCode" class="active">💻 代码暗纹</button>
+  </div>
+  <canvas id="scene"></canvas>
+
+  <script>
+    (() => {
+      const canvas = document.getElementById("scene");
+      const ctx = canvas.getContext("2d", { alpha: false });
+      const bloomCanvas = document.createElement("canvas");
+      const bloomCtx = bloomCanvas.getContext("2d");
+
+      const THEMES = [
+        {
+          bgTop: "#071126", bgBot: "#02040a",
+          deepShadow: [14, 52, 132],
+          silkDeep: [26, 98, 220],
+          silkMid: [76, 172, 250],
+          silkRim: [175, 232, 255],
+          goldCore: [255, 245, 208],
+          goldWarm: [246, 182, 68],
+          goldDeep: [212, 132, 34],
+          wingTip: [82, 172, 248],
+          wingMid: [165, 218, 255],
+          wingRoot: [252, 218, 142]
+        },
+        {
+          bgTop: "#1a0709", bgBot: "#050204",
+          deepShadow: [108, 22, 18],
+          silkDeep: [195, 42, 26],
+          silkMid: [252, 112, 42],
+          silkRim: [255, 225, 152],
+          goldCore: [255, 248, 220],
+          goldWarm: [255, 178, 52],
+          goldDeep: [215, 92, 24],
+          wingTip: [238, 72, 38],
+          wingMid: [255, 158, 68],
+          wingRoot: [255, 232, 168]
+        },
+        {
+          bgTop: "#0d0722", bgBot: "#03020a",
+          deepShadow: [56, 24, 128],
+          silkDeep: [102, 48, 218],
+          silkMid: [168, 102, 255],
+          silkRim: [182, 238, 255],
+          goldCore: [255, 242, 228],
+          goldWarm: [242, 165, 255],
+          goldDeep: [158, 84, 235],
+          wingTip: [88, 206, 255],
+          wingMid: [192, 156, 255],
+          wingRoot: [255, 226, 196]
+        }
+      ];
+
+      let themeIdx = 0;
+      let showCodeOverlay = true;
+      let W = 1280, H = 720, DPR = 1;
+
+      function resize() {
+        DPR = Math.min(window.devicePixelRatio || 1, 2);
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = Math.floor(W * DPR);
+        canvas.height = Math.floor(H * DPR);
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        bloomCanvas.width = Math.max(320, Math.floor(W * 0.34));
+        bloomCanvas.height = Math.max(180, Math.floor(H * 0.34));
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      function makeGlowSprite(size, rCol, gCol, bCol, midStop) {
+        const c = document.createElement("canvas");
+        c.width = c.height = size;
+        const g = c.getContext("2d");
+        const r = size / 2;
+        const grad = g.createRadialGradient(r, r, 0, r, r, r);
+        grad.addColorStop(0, "rgba(" + rCol + "," + gCol + "," + bCol + ",1)");
+        grad.addColorStop(midStop, "rgba(" + rCol + "," + gCol + "," + bCol + ",0.32)");
+        grad.addColorStop(1, "rgba(" + rCol + "," + gCol + "," + bCol + ",0)");
+        g.fillStyle = grad;
+        g.fillRect(0, 0, size, size);
+        return c;
+      }
+      const warmOrb = makeGlowSprite(128, 255, 214, 128, 0.26);
+      const iceOrb = makeGlowSprite(128, 115, 198, 255, 0.28);
+
+      const CODE_LINES = [
+        "running = True",
+        "while running:",
+        "    screen.fill(DEEP_VOID)",
+        "    # 凤凰双翼骨骼相位与流体丝绸长尾动力学更新",
+        "    flap_phase += 0.048",
+        "    fly_shift   = math.sin(fly_time) * 28",
+        "    wing_wave   = [math.sin(flap_phase - k * 0.52) for k in range(3)]",
+        "",
+        "    for ribbon in silk_tail_veils:",
+        "        ribbon.advect_vortex_wake(dt, curl_turbulence=1.35)",
+        "        ribbon.shade_fresnel_caustics(ice_sapphire, champagne_gold)",
+        "",
+        "    for plume in phoenix.feathers_sorted_by_depth():",
+        "        plume.render_translucent_barbs(hdr_surface, blend='ADDITIVE')",
+        "    stardust_pool.emit_golden_embers(phoenix.wing_tips, count=18)",
+        "    bloom_compositor.present(hdr_surface, exposure=1.18)"
+      ];
+
+      const bgStars = Array.from({ length: 210 }, () => ({
+        x: Math.random(), y: Math.random(),
+        r: Math.random() * 1.4 + 0.28,
+        twinkle: Math.random() * Math.PI * 2,
+        speed: 0.14 + Math.random() * 0.55,
+        warm: Math.random() < 0.36
+      }));
+
+      // Ambient cosmic golden & blue silk mist filaments (like upper-right & lower-left in reference)
+      const nebulaStreams = Array.from({ length: 6 }, (_, i) => ({
+        x: (i * 0.27) % 1.2,
+        y: [0.16, 0.24, 0.78, 0.62, 0.34, 0.86][i],
+        len: 320 + (i % 3) * 130,
+        amp: 24 + (i % 4) * 11,
+        phase: i * 1.3,
+        speed: 0.35 + (i % 3) * 0.18,
+        isGold: i % 2 === 0
+      }));
+
+      const FOV = 820;
+      function project3D(x, y, z, cx, cy) {
+        const scale = FOV / Math.max(220, FOV + z);
+        return { x: cx + x * scale, y: cy + y * scale, s: scale, z };
+      }
+      function rgb(arr, a) {
+        return "rgba(" + arr[0] + "," + arr[1] + "," + arr[2] + "," + a + ")";
+      }
+      function mixRgb(a, b, t) {
+        return [
+          Math.round(a[0] + (b[0] - a[0]) * t),
+          Math.round(a[1] + (b[1] - a[1]) * t),
+          Math.round(a[2] + (b[2] - a[2]) * t)
+        ];
+      }
+
+      // 14 Grand Flowing Silk-Chiffon Tail Veils + 4 Incandescent Golden Filament Streamers
+      const NUM_RIBBONS = 16;
+      const RIBBON_NODES = 68;
+      const ribbons = Array.from({ length: NUM_RIBBONS }, (_, idx) => {
+        const isGoldFilament = idx >= 12;
+        const norm = (idx % 12) / 11 - 0.5; // -0.5 .. +0.5
+        return {
+          isGoldFilament,
+          norm,
+          baseWidth: isGoldFilament
+            ? (5.5 + (idx % 3) * 2.5)
+            : (34 + Math.cos(norm * 2.6) * 24 + (idx % 3) * 8),
+          freq: 1.25 + (idx % 5) * 0.24,
+          phase: idx * 0.72,
+          twistFreq: 1.65 + (idx % 6) * 0.21,
+          ySpread: norm * 54 + Math.sin(idx * 2.1) * 16,
+          zBias: norm * 120,
+          nodes: Array.from({ length: RIBBON_NODES }, () => ({ x: 0, y: 0, z: 0 }))
+        };
+      });
+
+      const MAX_DUST = 1050;
+      const stardust = [];
+      function spawnDust(x, y, z, vx, vy, vz, goldProb = 0.76, sizeMul = 1) {
+        if (stardust.length >= MAX_DUST) return;
+        stardust.push({
+          x, y, z, vx, vy, vz,
+          life: 1.0,
+          decay: 0.0065 + Math.random() * 0.011,
+          size: (1.2 + Math.random() * 2.8) * sizeMul,
+          isGold: Math.random() < goldProb,
+          flare: Math.random() < 0.13,
+          seed: Math.random() * 12
+        });
+      }
+
+      const pointer = { x: 0.67, y: 0.44, active: false };
+      let phoenixPos = { x: 0.67, y: 0.44 };
+      let phoenixVel = { x: 0, y: 0 };
+
+      window.addEventListener("pointermove", (e) => {
+        pointer.x = Math.max(0.32, Math.min(0.86, e.clientX / Math.max(1, W)));
+        pointer.y = Math.max(0.20, Math.min(0.76, e.clientY / Math.max(1, H)));
+        pointer.active = true;
+      });
+      window.addEventListener("pointerdown", (e) => {
+        const px = e.clientX - W * phoenixPos.x;
+        const py = e.clientY - H * phoenixPos.y;
+        for (let i = 0; i < 70; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const sp = 1.4 + Math.random() * 6.2;
+          spawnDust(px, py, (Math.random() - 0.5) * 70, Math.cos(a) * sp - 2.4, Math.sin(a) * sp, (Math.random() - 0.5) * 3, 0.82, 1.3);
+        }
+      });
+
+      document.querySelectorAll("[data-theme]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-theme]").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          themeIdx = Number(btn.dataset.theme) || 0;
+        });
+      });
+      const toggleCodeBtn = document.getElementById("toggleCode");
+      toggleCodeBtn.addEventListener("click", () => {
+        showCodeOverlay = !showCodeOverlay;
+        toggleCodeBtn.classList.toggle("active", showCodeOverlay);
+      });
+
+      // Sculpted organic curved feather plume with curved tip & soft translucent vane
+      function drawCurvedFeather(x0, y0, cx1, cy1, x1, y1, width, rootCol, midCol, tipCol, alpha, shaftAlpha) {
+        const dx = x1 - x0, dy = y1 - y0;
+        const len = Math.hypot(dx, dy);
+        if (len < 3) return;
+        const nx = -dy / len, ny = dx / len;
+
+        const grad = ctx.createLinearGradient(x0, y0, x1, y1);
+        grad.addColorStop(0, rgb(rootCol, alpha * 0.88));
+        grad.addColorStop(0.38, rgb(midCol, alpha * 0.68));
+        grad.addColorStop(0.78, rgb(tipCol, alpha * 0.36));
+        grad.addColorStop(1, rgb(tipCol, 0));
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.quadraticCurveTo(cx1 + nx * width * 0.48, cy1 + ny * width * 0.48, x1, y1);
+        ctx.quadraticCurveTo(cx1 - nx * width * 0.85, cy1 - ny * width * 0.85, x0, y0);
+        ctx.closePath();
+        ctx.fill();
+
+        if (shaftAlpha > 0.01) {
+          ctx.strokeStyle = rgb(rootCol, shaftAlpha);
+          ctx.lineWidth = Math.max(0.65, width * 0.085);
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.quadraticCurveTo(cx1, cy1, x0 + dx * 0.9, y0 + dy * 0.9);
+          ctx.stroke();
+        }
+      }
+
+      // Render 3/4 Aerial Banking Wing:
+      //   side = -1 -> Upper-Left Far Wing (arches majestically up-and-left, staying inside frame!)
+      //   side = +1 -> Lower-Right Near Wing (arches out-right and droops gracefully at tips like an eagle/phoenix!)
+      function renderWing(t, side, cx, cy, flapPhase, theme, scaleMul) {
+        const f1 = Math.sin(flapPhase);
+        const f2 = Math.sin(flapPhase - 0.58);
+        const f3 = Math.sin(flapPhase - 1.12);
+
+        let p0, p1, p2, p3;
+        if (side < 0) {
+          // Far / Upper-Left Wing in 3/4 dorsal banking view
+          p0 = { x: 10, y: -10, z: 24 };
+          p1 = { x: -72, y: -88 - f1 * 36, z: 75 };
+          p2 = { x: -168, y: -146 - f1 * 38 - f2 * 30, z: 125 };
+          p3 = { x: -278, y: -158 - f1 * 28 - f2 * 34 - f3 * 26, z: 165 };
+        } else {
+          // Near / Lower-Right Wing arching forward-right & sweeping downward at primary tips
+          p0 = { x: 22, y: 4, z: -18 };
+          p1 = { x: 86, y: 26 + f1 * 42, z: -78 };
+          p2 = { x: 168, y: 74 + f1 * 44 + f2 * 36, z: -128 };
+          p3 = { x: 236, y: 158 + f1 * 34 + f2 * 38 + f3 * 34, z: -152 };
+        }
+
+        function sampleBone(u) {
+          const iu = 1 - u;
+          return {
+            x: (iu*iu*iu*p0.x + 3*iu*iu*u*p1.x + 3*iu*u*u*p2.x + u*u*u*p3.x) * scaleMul,
+            y: (iu*iu*iu*p0.y + 3*iu*iu*u*p1.y + 3*iu*u*u*p2.y + u*u*u*p3.y) * scaleMul,
+            z: (iu*iu*iu*p0.z + 3*iu*iu*u*p1.z + 3*iu*u*u*p2.z + u*u*u*p3.z) * scaleMul
+          };
+        }
+
+        const dim = side < 0 ? 0.82 : 1.0;
+
+        // 1. Deep Sapphire Under-Wing Translucent Shadow Veil (prevents white blowout & adds painterly volume!)
+        ctx.save();
+        ctx.globalCompositeOperation = "source-over";
+        ctx.beginPath();
+        for (let k = 0; k <= 16; k++) {
+          const b = sampleBone(k / 16);
+          const s = project3D(b.x, b.y, b.z, cx, cy);
+          if (k === 0) ctx.moveTo(s.x, s.y);
+          else ctx.lineTo(s.x, s.y);
+        }
+        for (let k = 16; k >= 0; k--) {
+          const u = k / 16;
+          const b = sampleBone(u);
+          const chord = (95 + Math.sin(u * Math.PI) * 65) * (1 - u * 0.35) * scaleMul;
+          const tx = b.x - chord * (side < 0 ? 0.62 : 0.74);
+          const ty = b.y + chord * (side < 0 ? 0.58 : 0.64);
+          const s = project3D(tx, ty, b.z, cx, cy);
+          ctx.lineTo(s.x, s.y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = rgb(theme.deepShadow, 0.38 * dim);
+        ctx.fill();
+        ctx.restore();
+
+        // 2. Additive Luminous Multi-Tiered Feathers (controlled alpha for rich golden-amber & ice-blue detail!)
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+
+        // Soft warm amber-gold inner glow at wing mid-coverts
+        for (let k = 1; k <= 4; k++) {
+          const u = k / 6;
+          const b = sampleBone(u);
+          const s = project3D(b.x - 24 * scaleMul, b.y + 22 * scaleMul, b.z, cx, cy);
+          const r = (74 - k * 9) * s.s * scaleMul;
+          ctx.globalAlpha = 0.13 * dim;
+          ctx.drawImage(k <= 2 ? warmOrb : iceOrb, s.x - r, s.y - r, r * 2, r * 2);
+        }
+        ctx.globalAlpha = 1;
+
+        // Tier A: 26 Sculpted Primary & Secondary Flight Plumes (ragged organic lengths & curved tips)
+        const NUM_PRIM = 26;
+        for (let i = 0; i < NUM_PRIM; i++) {
+          const u = i / (NUM_PRIM - 1);
+          const root = sampleBone(u);
+          // Organic jagged variation so it never looks like a uniform comb
+          const jag = 0.86 + 0.24 * Math.sin(i * 2.7 + 0.8) + 0.12 * Math.cos(i * 4.3);
+          const bell = Math.sin(Math.pow(u, 0.8) * Math.PI);
+          const len = (88 + bell * 86 + (u > 0.6 ? (u - 0.6) * 48 : 0)) * jag * scaleMul;
+          const flex = Math.sin(flapPhase - 0.7 - u * 1.2) * 16 * scaleMul;
+
+          let tip3, mid3;
+          if (side < 0) {
+            // Feathers sweep backward-left & gently droop
+            tip3 = {
+              x: root.x - len * (0.78 - u * 0.22),
+              y: root.y + len * (0.62 - u * 0.28) + flex,
+              z: root.z + 12
+            };
+            mid3 = {
+              x: (root.x + tip3.x) * 0.5 + 10 * scaleMul,
+              y: (root.y + tip3.y) * 0.5 - 12 * scaleMul,
+              z: root.z + 6
+            };
+          } else {
+            // Near wing feathers sweep back-left and droop dramatically downward at outer primaries!
+            tip3 = {
+              x: root.x - len * (0.82 - u * 0.52),
+              y: root.y + len * (0.56 + u * 0.42) + flex,
+              z: root.z - 8
+            };
+            mid3 = {
+              x: (root.x + tip3.x) * 0.5 + 14 * scaleMul,
+              y: (root.y + tip3.y) * 0.5 - 8 * scaleMul,
+              z: root.z - 4
+            };
+          }
+
+          const sr = project3D(root.x, root.y, root.z, cx, cy);
+          const sm = project3D(mid3.x, mid3.y, mid3.z, cx, cy);
+          const st = project3D(tip3.x, tip3.y, tip3.z, cx, cy);
+
+          const w = (16 + bell * 13) * sr.s * scaleMul;
+          drawCurvedFeather(
+            sr.x, sr.y, sm.x, sm.y, st.x, st.y, w,
+            theme.wingRoot, theme.wingMid, theme.wingTip,
+            0.22 * dim, 0.24 * dim
+          );
+
+          if (Math.random() < 0.14) {
+            spawnDust(
+              tip3.x, tip3.y, tip3.z,
+              (-2.5 - Math.random() * 2.0) * scaleMul,
+              (0.35 + (Math.random() - 0.5) * 1.5) * scaleMul,
+              (Math.random() - 0.5) * 1.5,
+              u < 0.5 ? 0.84 : 0.58,
+              0.92
+            );
+          }
+        }
+
+        // Tier B: 18 Warm Champagne-Gold & Ivory Covert Feathers
+        const NUM_COV = 18;
+        for (let i = 0; i < NUM_COV; i++) {
+          const u = (i / (NUM_COV - 1)) * 0.88;
+          const root = sampleBone(u);
+          const jag = 0.88 + 0.2 * Math.cos(i * 3.1);
+          const len = (54 + Math.sin(u * Math.PI) * 44) * jag * scaleMul;
+          const tip3 = {
+            x: root.x - len * (side < 0 ? 0.72 : 0.68),
+            y: root.y + len * (side < 0 ? 0.54 : 0.62),
+            z: root.z
+          };
+          const mid3 = {
+            x: (root.x + tip3.x) * 0.5 + 8 * scaleMul,
+            y: (root.y + tip3.y) * 0.5 - 6 * scaleMul,
+            z: root.z
+          };
+          const sr = project3D(root.x, root.y, root.z, cx, cy);
+          const sm = project3D(mid3.x, mid3.y, mid3.z, cx, cy);
+          const st = project3D(tip3.x, tip3.y, tip3.z, cx, cy);
+
+          drawCurvedFeather(
+            sr.x, sr.y, sm.x, sm.y, st.x, st.y,
+            (14 + Math.sin(u * Math.PI) * 9) * sr.s * scaleMul,
+            theme.goldCore, theme.goldWarm, theme.wingMid,
+            0.24 * dim, 0.16 * dim
+          );
+        }
+
+        // Crisp Golden-White Leading Edge Highlight
+        ctx.beginPath();
+        for (let k = 0; k <= 22; k++) {
+          const b = sampleBone(k / 22);
+          const p = project3D(b.x, b.y, b.z, cx, cy);
+          if (k === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.strokeStyle = rgb(theme.goldCore, 0.58 * dim);
+        ctx.lineWidth = 2.4 * scaleMul;
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // Sculpted Phoenix Torso, Graceful Swan-S Neck, Noble Head, Beak & Flowing Crown Crest
+      function renderBodyAndHead(t, cx, cy, flapPhase, theme, scaleMul) {
+        const bob = Math.sin(flapPhase - 0.25) * 6 * scaleMul;
+        const tailBase = { x: cx - 44 * scaleMul, y: cy + 20 * scaleMul + bob * 0.4 };
+        const chest    = { x: cx + 28 * scaleMul, y: cy + 4 * scaleMul + bob };
+        const neckMid  = { x: cx + 64 * scaleMul, y: cy - 32 * scaleMul + bob * 0.8 };
+        const head     = { x: cx + 88 * scaleMul, y: cy - 62 * scaleMul + bob * 0.65 };
+        const beakTip  = { x: cx + 114 * scaleMul, y: cy - 56 * scaleMul + bob * 0.65 };
+
+        // Base sculpted silhouette (source-over so anatomy stays crisp & never washes out!)
+        ctx.save();
+        const silGrad = ctx.createLinearGradient(tailBase.x, tailBase.y, head.x, head.y);
+        silGrad.addColorStop(0, rgb(theme.silkDeep, 0.72));
+        silGrad.addColorStop(0.45, rgb(theme.goldDeep, 0.85));
+        silGrad.addColorStop(0.82, rgb(theme.goldWarm, 0.92));
+        silGrad.addColorStop(1, rgb(theme.goldCore, 0.96));
+
+        ctx.fillStyle = silGrad;
+        ctx.beginPath();
+        ctx.moveTo(tailBase.x, tailBase.y);
+        ctx.bezierCurveTo(
+          chest.x - 22 * scaleMul, chest.y - 20 * scaleMul,
+          neckMid.x - 16 * scaleMul, neckMid.y - 10 * scaleMul,
+          head.x - 6 * scaleMul, head.y - 9 * scaleMul
+        );
+        // Noble crown + curved eagle/phoenix beak
+        ctx.quadraticCurveTo(head.x + 9 * scaleMul, head.y - 11 * scaleMul, beakTip.x, beakTip.y);
+        ctx.quadraticCurveTo(head.x + 12 * scaleMul, head.y + 1 * scaleMul, head.x + 2 * scaleMul, head.y + 6 * scaleMul);
+        // Slender throat -> arched chest -> tapered tail root
+        ctx.bezierCurveTo(
+          neckMid.x + 11 * scaleMul, neckMid.y + 14 * scaleMul,
+          chest.x + 20 * scaleMul, chest.y + 24 * scaleMul,
+          tailBase.x, tailBase.y + 12 * scaleMul
+        );
+        ctx.closePath();
+        ctx.fill();
+
+        // Additive rim light & flowing crown crest plumes (凤冠翎羽)
+        ctx.globalCompositeOperation = "lighter";
+        const auraR = 68 * scaleMul;
+        ctx.globalAlpha = 0.24;
+        ctx.drawImage(warmOrb, chest.x - auraR, chest.y - auraR, auraR * 2, auraR * 2);
+        ctx.globalAlpha = 1;
+
+        for (let i = 0; i < 8; i++) {
+          const u = i / 7;
+          const wave = Math.sin(t * 4.4 - i * 0.5) * 6 * scaleMul;
+          const len = (36 + (1 - Math.abs(u - 0.3)) * 42) * scaleMul;
+          const sx = head.x - (3 + u * 7) * scaleMul;
+          const sy = head.y - (7 - u * 5) * scaleMul;
+          const ex = sx - len;
+          const ey = sy - (14 - u * 26) * scaleMul + wave;
+
+          ctx.strokeStyle = i < 4 ? rgb(theme.goldCore, 0.72) : rgb(theme.silkRim, 0.55);
+          ctx.lineWidth = (2.2 - u * 0.9) * scaleMul;
+          ctx.beginPath();
+          ctx.moveTo(sx, sy);
+          ctx.quadraticCurveTo((sx + ex) * 0.5 + 8 * scaleMul, (sy + ey) * 0.5 - 9 * scaleMul, ex, ey);
+          ctx.stroke();
+        }
+
+        // Fierce dark iris + bright golden-white pinpoint eye
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = "#1e1b18";
+        ctx.beginPath();
+        ctx.arc(head.x + 5 * scaleMul, head.y - 2 * scaleMul, 2.6 * scaleMul, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fffbeb";
+        ctx.beginPath();
+        ctx.arc(head.x + 5.6 * scaleMul, head.y - 2.4 * scaleMul, 1.3 * scaleMul, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // Grand 800px Billowing Silk-Chiffon Tail Streams with Sapphire Veils & Golden Rim Caustics
+      function updateAndRenderRibbons(t, cx, cy, flapPhase, theme, scaleMul, pass) {
+        const anchorX = -38 * scaleMul;
+        const anchorY = (16 + Math.sin(flapPhase - 0.25) * 6) * scaleMul;
+
+        for (let rIdx = 0; rIdx < ribbons.length; rIdx++) {
+          const rb = ribbons[rIdx];
+          const inFront = rb.zBias <= 0;
+          if ((pass === "back" && inFront) || (pass === "front" && !inFront)) continue;
+
+          rb.nodes[0].x = anchorX;
+          rb.nodes[0].y = anchorY + rb.norm * 16 * scaleMul;
+          rb.nodes[0].z = rb.zBias * 0.35;
+
+          const stepX = 12.6 * scaleMul; // Extends ~820px across the left canvas!
+          for (let i = RIBBON_NODES - 1; i >= 1; i--) {
+            const prev = rb.nodes[i - 1];
+            const cur = rb.nodes[i];
+            const u = i / RIBBON_NODES;
+            // Broad, majestic S-curve billowing waves
+            const billowY = Math.sin(t * rb.freq * 1.85 - i * 0.115 + rb.phase) * (3.2 + u * 10.5)
+                          + Math.cos(t * 1.35 - i * 0.07 + rIdx) * u * 5.2;
+            const billowZ = Math.cos(t * rb.freq * 1.4 - i * 0.11 + rb.phase) * (2.5 + u * 7.5);
+
+            const tx = prev.x - stepX * (0.88 + u * 0.28);
+            const ty = prev.y + (rb.ySpread * 0.048 + billowY * 0.44 + u * 2.1) * scaleMul;
+            const tz = prev.z + (rb.zBias * 0.025 + billowZ * 0.42);
+
+            cur.x += (tx - cur.x) * 0.48;
+            cur.y += (ty - cur.y) * 0.40;
+            cur.z += (tz - cur.z) * 0.40;
+          }
+
+          const upper = [], lower = [], center = [];
+          for (let i = 0; i < RIBBON_NODES; i++) {
+            const u = i / (RIBBON_NODES - 1);
+            const n = rb.nodes[i];
+            const p = project3D(n.x, n.y, n.z, cx, cy);
+
+            // Narrow at tail root, swelling broadly across mid-tail, tapering gracefully at far left
+            const env = (0.32 + 0.88 * Math.sin(Math.pow(u, 0.62) * Math.PI)) * (1 - u * 0.25);
+            const twist = Math.cos(t * rb.twistFreq - u * 5.4 + rb.phase);
+            const w = rb.baseWidth * env * (0.22 + 0.78 * Math.abs(twist)) * p.s * scaleMul;
+
+            const nNext = rb.nodes[Math.min(RIBBON_NODES - 1, i + 1)];
+            const pNext = project3D(nNext.x, nNext.y, nNext.z, cx, cy);
+            const dx = pNext.x - p.x, dy = pNext.y - p.y;
+            const dl = Math.hypot(dx, dy) || 1;
+            const nx = -dy / dl, ny = dx / dl;
+
+            center.push(p);
+            upper.push({ x: p.x + nx * w, y: p.y + ny * w });
+            lower.push({ x: p.x - nx * w, y: p.y - ny * w });
+
+            if (i > 3 && i < 56 && Math.random() < 0.036) {
+              spawnDust(
+                n.x, n.y + (Math.random() - 0.5) * 24, n.z,
+                (-2.8 - Math.random() * 2.2) * scaleMul,
+                (Math.random() - 0.5) * 1.5,
+                (Math.random() - 0.5) * 1.4,
+                rb.isGoldFilament ? 0.96 : 0.74,
+                rb.isGoldFilament ? 1.15 : 0.92
+              );
+            }
+          }
+
+          const pHead = center[0], pTail = center[RIBBON_NODES - 1];
+
+          // Pass 1: Translucent Deep Cobalt Chiffon Body (rich sapphire tone, zero whiteout!)
+          if (!rb.isGoldFilament) {
+            ctx.save();
+            ctx.globalCompositeOperation = "source-over";
+            const baseG = ctx.createLinearGradient(pHead.x, pHead.y, pTail.x, pTail.y);
+            baseG.addColorStop(0, rgb(theme.deepShadow, 0.34));
+            baseG.addColorStop(0.45, rgb(theme.deepShadow, 0.26));
+            baseG.addColorStop(0.85, rgb(theme.deepShadow, 0.10));
+            baseG.addColorStop(1, rgb(theme.deepShadow, 0));
+            ctx.fillStyle = baseG;
+            ctx.beginPath();
+            ctx.moveTo(upper[0].x, upper[0].y);
+            for (let i = 1; i < RIBBON_NODES; i++) ctx.lineTo(upper[i].x, upper[i].y);
+            for (let i = RIBBON_NODES - 1; i >= 0; i--) ctx.lineTo(lower[i].x, lower[i].y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          }
+
+          // Pass 2: Additive Silk Luminescence + Fresnel Rim Caustics + Golden Energy Threads
+          ctx.save();
+          ctx.globalCompositeOperation = "lighter";
+          const veilG = ctx.createLinearGradient(pHead.x, pHead.y, pTail.x, pTail.y);
+          if (rb.isGoldFilament) {
+            veilG.addColorStop(0, rgb(theme.goldCore, 0.45));
+            veilG.addColorStop(0.38, rgb(theme.goldWarm, 0.34));
+            veilG.addColorStop(0.78, rgb(theme.goldDeep, 0.15));
+            veilG.addColorStop(1, rgb(theme.goldDeep, 0));
+          } else {
+            veilG.addColorStop(0, rgb(theme.goldWarm, 0.18));
+            veilG.addColorStop(0.14, rgb(theme.silkMid, 0.17));
+            veilG.addColorStop(0.55, rgb(theme.silkDeep, 0.14));
+            veilG.addColorStop(0.88, rgb(theme.silkDeep, 0.05));
+            veilG.addColorStop(1, rgb(theme.silkDeep, 0));
+          }
+
+          ctx.fillStyle = veilG;
+          ctx.beginPath();
+          ctx.moveTo(upper[0].x, upper[0].y);
+          for (let i = 1; i < RIBBON_NODES; i++) ctx.lineTo(upper[i].x, upper[i].y);
+          for (let i = RIBBON_NODES - 1; i >= 0; i--) ctx.lineTo(lower[i].x, lower[i].y);
+          ctx.closePath();
+          ctx.fill();
+
+          // Glowing Fresnel Silk Borders
+          const rimG = ctx.createLinearGradient(pHead.x, pHead.y, pTail.x, pTail.y);
+          if (rb.isGoldFilament) {
+            rimG.addColorStop(0, rgb(theme.goldCore, 0.85));
+            rimG.addColorStop(0.48, rgb(theme.goldWarm, 0.62));
+            rimG.addColorStop(0.85, rgb(theme.goldWarm, 0.22));
+            rimG.addColorStop(1, rgb(theme.goldWarm, 0));
+          } else {
+            rimG.addColorStop(0, rgb(theme.goldWarm, 0.46));
+            rimG.addColorStop(0.20, rgb(theme.silkRim, 0.52));
+            rimG.addColorStop(0.65, rgb(theme.silkMid, 0.32));
+            rimG.addColorStop(0.92, rgb(theme.silkMid, 0.08));
+            rimG.addColorStop(1, rgb(theme.silkMid, 0));
+          }
+
+          ctx.strokeStyle = rimG;
+          ctx.lineWidth = (rb.isGoldFilament ? 2.1 : 1.45) * scaleMul;
+          ctx.beginPath();
+          ctx.moveTo(upper[0].x, upper[0].y);
+          for (let i = 1; i < RIBBON_NODES; i++) ctx.lineTo(upper[i].x, upper[i].y);
+          ctx.stroke();
+
+          if (!rb.isGoldFilament) {
+            ctx.lineWidth = 1.1 * scaleMul;
+            ctx.beginPath();
+            ctx.moveTo(lower[0].x, lower[0].y);
+            for (let i = 1; i < RIBBON_NODES; i++) ctx.lineTo(lower[i].x, lower[i].y);
+            ctx.stroke();
+          }
+
+          ctx.restore();
+        }
+      }
+
+      // Prewarm 110 frames so frame 0 opens in full cinematic glory
+      function prewarm() {
+        const scaleMul = Math.max(0.62, Math.min(W / 1280, H / 720) * 0.98);
+        for (let step = 0; step < 110; step++) {
+          const ft = step * 0.033;
+          for (let rIdx = 0; rIdx < ribbons.length; rIdx++) {
+            const rb = ribbons[rIdx];
+            rb.nodes[0].x = -38 * scaleMul;
+            rb.nodes[0].y = (16 + rb.norm * 16) * scaleMul;
+            rb.nodes[0].z = rb.zBias * 0.35;
+            const stepX = 12.6 * scaleMul;
+            for (let i = RIBBON_NODES - 1; i >= 1; i--) {
+              const prev = rb.nodes[i - 1], cur = rb.nodes[i];
+              const u = i / RIBBON_NODES;
+              const billowY = Math.sin(ft * rb.freq * 1.85 - i * 0.115 + rb.phase) * (3.2 + u * 10.5)
+                            + Math.cos(ft * 1.35 - i * 0.07 + rIdx) * u * 5.2;
+              const billowZ = Math.cos(ft * rb.freq * 1.4 - i * 0.11 + rb.phase) * (2.5 + u * 7.5);
+              cur.x += (prev.x - stepX * (0.88 + u * 0.28) - cur.x) * 0.55;
+              cur.y += (prev.y + (rb.ySpread * 0.048 + billowY * 0.44 + u * 2.1) * scaleMul - cur.y) * 0.5;
+              cur.z += (prev.z + (rb.zBias * 0.025 + billowZ * 0.42) - cur.z) * 0.5;
+            }
+          }
+        }
+        for (let i = 0; i < 520; i++) {
+          const rb = ribbons[i % ribbons.length];
+          const n = rb.nodes[Math.floor(Math.random() * (RIBBON_NODES - 6)) + 3];
+          spawnDust(
+            n.x + (Math.random() - 0.5) * 44,
+            n.y + (Math.random() - 0.5) * 44,
+            n.z + (Math.random() - 0.5) * 40,
+            -2.6 - Math.random() * 2.2,
+            (Math.random() - 0.5) * 1.5,
+            (Math.random() - 0.5) * 1.2,
+            0.76, 1.0
+          );
+          stardust[stardust.length - 1].life = 0.15 + Math.random() * 0.85;
+        }
+      }
+      prewarm();
+
+      let startTime = performance.now();
+
+      function render(now) {
+        const t = (now - startTime) / 1000 + 1.85;
+        const theme = THEMES[themeIdx];
+        const scaleMul = Math.max(0.62, Math.min(W / 1280, H / 720) * 0.98);
+
+        // 1. Deep Starry Void Background
+        const bgGrad = ctx.createRadialGradient(W * 0.62, H * 0.44, 50, W * 0.5, H * 0.5, Math.max(W, H) * 0.88);
+        bgGrad.addColorStop(0, theme.bgTop);
+        bgGrad.addColorStop(1, theme.bgBot);
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // 2. Subtle Translucent Code Backdrop
+        if (showCodeOverlay) {
+          ctx.save();
+          ctx.font = "13px Consolas, 'JetBrains Mono', monospace";
+          ctx.fillStyle = "rgba(135, 182, 235, 0.10)";
+          const scrollY = (t * 11) % (CODE_LINES.length * 22);
+          for (let rep = -1; rep <= 2; rep++) {
+            for (let i = 0; i < CODE_LINES.length; i++) {
+              const yy = 46 + rep * CODE_LINES.length * 22 + i * 22 - scrollY;
+              if (yy > -20 && yy < H + 20) ctx.fillText(CODE_LINES[i], 52, yy);
+            }
+          }
+          ctx.restore();
+        }
+
+        // 3. Stars & Ambient Golden/Sapphire Cosmic Ribbon Mist
+        ctx.save();
+        for (const st of bgStars) {
+          st.x -= st.speed * 0.0012;
+          if (st.x < 0) st.x += 1;
+          const tw = 0.32 + 0.68 * Math.abs(Math.sin(t * 2.2 + st.twinkle));
+          ctx.fillStyle = st.warm ? rgb(theme.goldWarm, tw * 0.82) : rgb(theme.silkRim, tw * 0.68);
+          ctx.beginPath();
+          ctx.arc(st.x * W, st.y * H, st.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.globalCompositeOperation = "lighter";
+        for (const ns of nebulaStreams) {
+          ns.x -= ns.speed * 0.0018;
+          if (ns.x < -0.35) ns.x = 1.28;
+          const wx = ns.x * W, wy = ns.y * H;
+          const col = ns.isGold ? theme.goldWarm : theme.silkDeep;
+          const wg = ctx.createLinearGradient(wx - ns.len, wy, wx + ns.len, wy - 35);
+          wg.addColorStop(0, rgb(col, 0));
+          wg.addColorStop(0.5, rgb(col, ns.isGold ? 0.22 : 0.16));
+          wg.addColorStop(1, rgb(col, 0));
+          ctx.strokeStyle = wg;
+          ctx.lineWidth = ns.isGold ? 2.6 : 22;
+          ctx.beginPath();
+          ctx.moveTo(wx - ns.len, wy + Math.sin(t * 1.3 + ns.phase) * ns.amp);
+          ctx.bezierCurveTo(
+            wx - ns.len * 0.32, wy - ns.amp * 1.1,
+            wx + ns.len * 0.28, wy + ns.amp * 0.9,
+            wx + ns.len, wy - 24
+          );
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // 4. Phoenix Position & Wingbeat Kinematics
+        const autoX = 0.67 + Math.sin(t * 0.48) * 0.045;
+        const autoY = 0.44 + Math.cos(t * 0.72) * 0.045;
+        const tx = pointer.active ? (autoX * 0.3 + pointer.x * 0.7) : autoX;
+        const ty = pointer.active ? (autoY * 0.3 + pointer.y * 0.7) : autoY;
+        phoenixPos.x += (tx - phoenixPos.x) * 0.04;
+        phoenixPos.y += (ty - phoenixPos.y) * 0.04;
+
+        const flapPhase = t * 2.85;
+        const cx = W * phoenixPos.x;
+        const cy = H * phoenixPos.y + Math.sin(flapPhase - 0.3) * 12 * scaleMul;
+
+        // 5. Layered 3D Painter's Render
+        renderWing(t, -1, cx, cy, flapPhase, theme, scaleMul);
+        updateAndRenderRibbons(t, cx, cy, flapPhase, theme, scaleMul, "back");
+        renderBodyAndHead(t, cx, cy, flapPhase, theme, scaleMul);
+        updateAndRenderRibbons(t, cx, cy, flapPhase, theme, scaleMul, "front");
+        renderWing(t, 1, cx, cy, flapPhase, theme, scaleMul);
+
+        // 6. Golden Stardust & Sapphire Ember Stream
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        for (let i = stardust.length - 1; i >= 0; i--) {
+          const p = stardust[i];
+          p.life -= p.decay;
+          if (p.life <= 0) {
+            stardust.splice(i, 1);
+            continue;
+          }
+          p.x += p.vx + Math.sin(t * 2.4 + p.seed) * 0.42;
+          p.y += p.vy + Math.cos(t * 2.0 + p.seed + p.x * 0.007) * 0.62;
+          p.z += p.vz;
+
+          const pr = project3D(p.x, p.y, p.z, cx, cy);
+          const twinkle = 0.55 + 0.45 * Math.sin(t * 8.5 + p.seed * 4.7);
+          const alpha = Math.min(1, p.life * 1.3) * twinkle;
+          const r = p.size * pr.s * scaleMul;
+          const col = p.isGold ? mixRgb(theme.goldWarm, theme.goldCore, 0.5) : theme.silkRim;
+
+          ctx.globalAlpha = alpha * 0.38;
+          ctx.drawImage(p.isGold ? warmOrb : iceOrb, pr.x - r * 3.0, pr.y - r * 3.0, r * 6.0, r * 6.0);
+
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = rgb(col, alpha * 0.95);
+          ctx.beginPath();
+          ctx.arc(pr.x, pr.y, Math.max(0.75, r * 0.68), 0, Math.PI * 2);
+          ctx.fill();
+
+          if (p.flare && p.life > 0.35) {
+            const fl = r * 3.8;
+            ctx.strokeStyle = rgb(theme.goldCore, alpha * 0.6);
+            ctx.lineWidth = 0.85;
+            ctx.beginPath();
+            ctx.moveTo(pr.x - fl, pr.y); ctx.lineTo(pr.x + fl, pr.y);
+            ctx.moveTo(pr.x, pr.y - fl); ctx.lineTo(pr.x, pr.y + fl);
+            ctx.stroke();
+          }
+        }
+        ctx.restore();
+
+        // 7. Subtle Cinematic Bloom Halo (controlled 0.28 intensity so feathers stay tack-sharp!)
+        bloomCtx.clearRect(0, 0, bloomCanvas.width, bloomCanvas.height);
+        bloomCtx.filter = "blur(8px)";
+        bloomCtx.drawImage(canvas, 0, 0, bloomCanvas.width, bloomCanvas.height);
+        bloomCtx.filter = "none";
+
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = 0.28;
+        ctx.drawImage(bloomCanvas, 0, 0, W, H);
+        ctx.restore();
+
+        requestAnimationFrame(render);
+      }
+
+      requestAnimationFrame(render);
+    })();
+  </script>
+</body>
+</html>
