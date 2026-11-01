@@ -15,6 +15,14 @@
 
 ## 📂 作品目录（共 18 个精选与原创展示）
 
+
+### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
+| 作品 | 路径 | 原作者与亮点说明 |
+| :--- | :--- | :--- |
+| **Navier-Stokes 流体动力学模拟** | [`web/webgl-fluid/index.html`](web/webgl-fluid/index.html) | [PavelDoGreat/WebGL-Fluid-Simulation](https://github.com/PavelDoGreat/WebGL-Fluid-Simulation) (★16.8k, MIT)。电影级 HDR Bloom 泛光 + Sunrays 体积光束，极度丝滑的发光流体。 |
+| **The Spirit — 3D 旋度噪声灵体** | [`web/the-spirit/index.html`](web/the-spirit/index.html) | [edankwan/The-Spirit](https://github.com/edankwan/The-Spirit) (★1.3k, MIT)。WebGL GPGPU FBO + 3D Curl-Noise + 实时体积阴影贴图，空间烟雾灵体。 |
+| **Volumetric Particle Flow — 三维体积粒子流** | [`web/volumetric-flow/index.html`](web/volumetric-flow/index.html) | [dli/flow](https://github.com/dli/flow) (★934, MIT)。GPU 实时解算矢量场流体碰撞与光晕散射，立体发光丝绸流线。 |
+
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点说明 |
 | :--- | :--- | :--- |
