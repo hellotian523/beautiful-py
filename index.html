@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visual Art Gallery — 创意视觉与生成艺术展示馆</title>
+  <style>
+    :root {
+      --bg: #070913;
+      --card: rgba(17, 24, 39, 0.78);
+      --border: rgba(148, 163, 184, 0.16);
+      --accent: #38bdf8;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 20% 0%, #172554 0%, var(--bg) 45%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-bottom: 64px;
+    }
+    header { max-width: 1200px; margin: 0 auto; padding: 56px 24px 32px; text-align: center; }
+    .pill { display: inline-block; padding: 4px 14px; border-radius: 999px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.32); color: #7dd3fc; font-size: 13px; margin-bottom: 14px; }
+    h1 { font-size: clamp(28px, 4vw, 44px); letter-spacing: -0.02em; margin-bottom: 12px; }
+    header p { color: var(--muted); max-width: 680px; margin: 0 auto 24px; font-size: 15px; }
+    .filters { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .filters button {
+      background: rgba(30, 41, 59, 0.7); color: var(--text); border: 1px solid var(--border);
+      padding: 8px 18px; border-radius: 999px; cursor: pointer; font-size: 14px; transition: all 0.2s;
+    }
+    .filters button.active, .filters button:hover { background: var(--accent); color: #082f49; border-color: var(--accent); font-weight: 600; }
+    main { max-width: 1200px; margin: 24px auto 0; padding: 0 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 22px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s; }
+    .card:hover { transform: translateY(-4px); border-color: rgba(56, 189, 248, 0.45); }
+    .thumb { height: 200px; background: #0f172a; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .thumb .placeholder { font-size: 46px; }
+    .tag { position: absolute; top: 12px; right: 12px; padding: 3px 10px; border-radius: 999px; font-size: 12px; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--border); color: #bae6fd; }
+    .body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }
+    .body h3 { font-size: 17px; margin-bottom: 6px; }
+    .body p { font-size: 13.5px; color: var(--muted); flex: 1; margin-bottom: 14px; }
+    .actions { display: flex; gap: 10px; align-items: center; }
+    .btn { display: inline-block; padding: 7px 14px; border-radius: 8px; font-size: 13px; text-decoration: none; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--accent); color: #082f49; }
+    .btn-ghost { background: rgba(51, 65, 85, 0.55); color: var(--text); font-family: monospace; font-size: 12px; padding: 7px 10px; border-radius: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
+    .modal { position: fixed; inset: 0; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+    .modal.open { display: flex; }
+    .modal-box { width: min(1100px, 96vw); height: min(760px, 88vh); background: #000; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
+    .modal-bar { padding: 10px 16px; background: #0f172a; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+    .modal-bar a { color: #7dd3fc; text-decoration: none; margin-right: 14px; font-size: 13px; }
+    .modal-bar button { background: #ef4444; color: #fff; border: none; border-radius: 6px; padding: 4px 12px; cursor: pointer; }
+    iframe { flex: 1; border: none; width: 100%; background: #000; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="pill">Python Turtle · Tkinter Particles · HTML5 Canvas</span>
+    <h1>✨ Visual Art & Creative Coding Gallery</h1>
+    <p>精选与原创的高颜值视觉代码仓库：涵盖分形艺术树、3D 流光粒子、流体极光星云、跳动粒子爱心与烟花秀。Web 作品支持直接在浏览器或 GitHub Pages 在线交互预览，Python 作品可通过 <code>python run.py</code> 一键启动。</p>
+    <div class="filters">
+      <button class="active" data-filter="all">全部作品 (17)</button>
+      <button data-filter="web">🌐 Web 在线交互 (7)</button>
+      <button data-filter="python">🐍 Python 桌面动画 (10)</button>
+    </div>
+  </header>
+
+  <main id="grid"></main>
+
+  <div class="modal" id="modal">
+    <div class="modal-box">
+      <div class="modal-bar">
+        <span id="modalTitle">预览</span>
+        <div>
+          <a id="modalNewTab" href="#" target="_blank" rel="noopener">↗ 新窗口全屏打开</a>
+          <button id="modalClose">关闭</button>
+        </div>
+      </div>
+      <iframe id="modalFrame" src="about:blank"></iframe>
+    </div>
+  </div>
+
+  <script>
+    const ITEMS = [
+      { type: "web", tag: "Web 3D Canvas · 原创", title: "3D 流光旋转粒子圣诞树", desc: "支持鼠标视差拖拽与三种流光主题切换的 3D 螺旋粒子树与漫天飞雪。", url: "web/3d-spiral-tree/index.html", icon: "🎄" },
+      { type: "web", tag: "Web Flow Field · 原创", title: "极光流体引力星云", desc: "1500+ 发光粒子构成的流体向量场，支持鼠标漩涡牵引与点击冲击波换色。", url: "web/aurora-cosmos/index.html", icon: "🌌" },
+      { type: "web", tag: "Web Canvas", title: "烟花绽放凝聚文字", desc: "漫天彩色烟花升空绽放后自动汇聚成发光祝福文字（支持 ?text=自定义文字）。", url: "web/firework-text/index.html", img: "assets/previews/firework_text.png" },
+      { type: "web", tag: "Web 3D + Shape Shifter", title: "3D 空间烟花与粒子字变换", desc: "3D 透视网格烟花搭配粒子动态重组倒计时与祝福文字。", url: "web/shape-shifter-particles/index.html", img: "assets/previews/shape_shifter.jpg" },
+      { type: "web", tag: "Web Canvas", title: "全屏庆典烟花秀", desc: "高饱和度多束礼花绽放动画，已彻底净化原文件悬浮广告。", url: "web/fireworks-celebration/index.html", icon: "🎆" },
+      { type: "web", tag: "CSS3 + Splitting", title: "彩色礼花生日蛋糕", desc: "字符拆分跳动特效与缤纷纸屑飘落庆典动画。", url: "web/cake-confetti/index.html", img: "assets/previews/cake_confetti.jpg" },
+      { type: "web", tag: "CSS3 Neon", title: "霓虹聚光灯扫描特效", desc: "纯 CSS3 clip-path 实现的彩虹霓虹聚光灯扫光文字。", url: "web/neon-spotlight/index.html", icon: "🌈" },
+
+      { type: "python", tag: "Python Turtle · 原创", title: "霓虹万花筒神圣几何曼陀罗", desc: "基于 HSV 色彩空间与黄金角螺旋生成的暗黑霓虹几何艺术。", cmd: "python python/generative/neon_mandala_turtle.py", icon: "🔮" },
+      { type: "python", tag: "Python Tkinter · 原创", title: "60FPS 星空引力交互烟花秀", desc: "纯标准库 Tkinter 物理粒子烟花，支持鼠标点击任意坐标定制发射。", cmd: "python python/generative/starry_fireworks_tk.py", icon: "🌠" },
+      { type: "python", tag: "Python Tkinter", title: "3D 跳动粒子光环爱心", desc: "数千颗粒子按心形参数方程与周期力场呼吸跳动。", cmd: "python python/hearts_and_characters/beating_particle_heart.py", img: "assets/previews/beating_particle_heart.jpg" },
+      { type: "python", tag: "Python Turtle", title: "草莓熊手持玫瑰花", desc: "660+ 行精细贝塞尔圆弧绘制草莓熊与多层渐变玫瑰。", cmd: "python python/hearts_and_characters/lotso_bear_rose.py", img: "assets/previews/lotso_bear_rose.png" },
+      { type: "python", tag: "Python Turtle", title: "满屏浪漫漂浮爱心", desc: "双缓冲帧动画实现多色爱心正弦摇曳上升。", cmd: "python python/hearts_and_characters/floating_hearts.py", icon: "💗" },
+      { type: "python", tag: "Python Turtle", title: "黑夜童话装饰圣诞树", desc: "黑底绿树搭配圣诞帽、拐杖糖、圣诞袜与六角雪花。", cmd: "python python/trees/night_decorated_tree.py", img: "assets/previews/night_decorated_tree.png" },
+      { type: "python", tag: "Python Turtle", title: "经典分形彩灯落雪圣诞树", desc: "递归分形树冠随机点缀彩灯与漫天六角雪花。", cmd: "python python/trees/fractal_christmas_tree.py", img: "assets/previews/fractal_christmas_tree.jpg" },
+      { type: "python", tag: "Python Turtle", title: "少女粉蝴蝶结圣诞树", desc: "粉色系波浪树冠搭配大小蝴蝶结与星星挂饰。", cmd: "python python/trees/pink_ribbon_tree.py", img: "assets/previews/pink_ribbon_tree.jpg" },
+      { type: "python", tag: "Python Turtle", title: "动态分形樱花落花树", desc: "随机分形树干生长与珊瑚粉花瓣飘落。", cmd: "python python/trees/sakura_fractal_tree.py", icon: "🌸" },
+      { type: "python", tag: "Python Turtle", title: "浪漫爱心叶片分形树", desc: "递归分形枝干末端绽放满树粉红爱心叶片。", cmd: "python python/trees/love_heart_tree.py", icon: "🌳" }
+    ];
+
+    const grid = document.getElementById("grid");
+    const modal = document.getElementById("modal");
+    const modalFrame = document.getElementById("modalFrame");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalNewTab = document.getElementById("modalNewTab");
+
+    function renderCards(filter = "all") {
+      grid.innerHTML = "";
+      ITEMS.filter(it => filter === "all" || it.type === filter).forEach(it => {
+        const card = document.createElement("article");
+        card.className = "card";
+        const media = it.img
+          ? `<img src="${it.img}" alt="${it.title}" loading="lazy" />`
+          : `<div class="placeholder">${it.icon || "✨"}</div>`;
+        const action = it.type === "web"
+          ? `<button class="btn btn-primary" data-url="${it.url}" data-title="${it.title}">▶ 在线预览</button><a class="btn" style="color:#94a3b8" href="${it.url}" target="_blank">全屏 ↗</a>`
+          : `<div class="btn-ghost" title="${it.cmd}">$ ${it.cmd}</div>`;
+        card.innerHTML = `
+          <div class="thumb">${media}<span class="tag">${it.tag}</span></div>
+          <div class="body">
+            <h3>${it.title}</h3>
+            <p>${it.desc}</p>
+            <div class="actions">${action}</div>
+          </div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    grid.addEventListener("click", e => {
+      const btn = e.target.closest("button[data-url]");
+      if (!btn) return;
+      modalTitle.textContent = btn.dataset.title;
+      modalNewTab.href = btn.dataset.url;
+      modalFrame.src = btn.dataset.url;
+      modal.classList.add("open");
+    });
+
+    document.getElementById("modalClose").addEventListener("click", () => {
+      modal.classList.remove("open");
+      modalFrame.src = "about:blank";
+    });
+
+    document.querySelectorAll(".filters button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderCards(btn.dataset.filter);
+      });
+    });
+
+    renderCards();
+  </script>
+</body>
+</html>
