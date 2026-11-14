@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Visual Art Gallery — 一键启动器与完整性自检脚本"""
+"""Visual Art Gallery — 一键启动器、完整性自检与自动构建脚本"""
 from __future__ import annotations
 
 import argparse
 import functools
 import http.server
+import json
 import py_compile
 import subprocess
 import sys
@@ -12,50 +13,47 @@ import webbrowser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-
-PYTHON_DEMOS = [
-    ("霓虹万花筒神圣几何曼陀罗 [原创/Turtle]", "python/generative/neon_mandala_turtle.py"),
-    ("60FPS 星空引力交互烟花秀 [原创/Tkinter]", "python/generative/starry_fireworks_tk.py"),
-    ("3D 跳动粒子光环爱心 [Tkinter]", "python/hearts_and_characters/beating_particle_heart.py"),
-    ("草莓熊手持玫瑰花 [Turtle]", "python/hearts_and_characters/lotso_bear_rose.py"),
-    ("满屏浪漫漂浮爱心 [Turtle]", "python/hearts_and_characters/floating_hearts.py"),
-    ("黑夜童话装饰圣诞树 [Turtle]", "python/trees/night_decorated_tree.py"),
-    ("经典分形彩灯落雪圣诞树 [Turtle]", "python/trees/fractal_christmas_tree.py"),
-    ("少女粉蝴蝶结圣诞树 [Turtle]", "python/trees/pink_ribbon_tree.py"),
-    ("动态分形樱花落花树 [Turtle]", "python/trees/sakura_fractal_tree.py"),
-    ("浪漫爱心叶片分形树 [Turtle]", "python/trees/love_heart_tree.py"),
-]
-
-WEB_DEMOS = [
-    ("在线视觉展厅总览 (Gallery Hub)", "index.html"),
-    ("冰蓝金羽·流光星尘凤凰 [镇馆原创/Volumetric Canvas]", "web/celestial-phoenix/index.html"),
-    ("3D 流光旋转粒子圣诞树 [原创/Canvas]", "web/3d-spiral-tree/index.html"),
-    ("极光流体引力星云 [原创/Canvas]", "web/aurora-cosmos/index.html"),
-    ("烟花绽放凝聚文字 [Canvas]", "web/firework-text/index.html"),
-    ("3D 空间烟花与粒子字变换 [Canvas]", "web/shape-shifter-particles/index.html"),
-    ("全屏庆典烟花秀 [Canvas]", "web/fireworks-celebration/index.html"),
-    ("彩色礼花生日蛋糕 [CSS3+JS]", "web/cake-confetti/index.html"),
-    ("霓虹聚光灯扫描特效 [CSS3]", "web/neon-spotlight/index.html"),
-]
+GALLERY_JSON = ROOT / "gallery.json"
 
 BANNED_SNIPPETS = ("hm.baidu.com", "weidian.com", "pan.quark.cn", "mp.weixin.qq.com", "hide_buttom")
 
 
+def load_gallery() -> dict:
+    if not GALLERY_JSON.is_file():
+        raise FileNotFoundError(f"Missing {GALLERY_JSON}")
+    return json.loads(GALLERY_JSON.read_text(encoding="utf-8"))
+
+
 def self_check() -> int:
-    for _, rel in PYTHON_DEMOS:
+    data = load_gallery()
+    py_items = data.get("python", [])
+    web_items = data.get("web", [])
+
+    for item in py_items:
+        rel = item.get("rel") or item.get("path")
         p = ROOT / rel
         assert p.is_file(), f"Missing Python demo: {rel}"
         py_compile.compile(str(p), doraise=True)
 
-    for _, rel in WEB_DEMOS:
+    for item in web_items:
+        rel = item.get("url") or item.get("path")
         p = ROOT / rel
         assert p.is_file(), f"Missing Web demo: {rel}"
-        text = p.read_text(encoding="utf-8")
+        text = p.read_text(encoding="utf-8", errors="ignore")
         for bad in BANNED_SNIPPETS:
             assert bad not in text, f"Ad/tracker snippet '{bad}' still in {rel}"
 
-    print(f"OK: {len(PYTHON_DEMOS)} Python demos compiled, {len(WEB_DEMOS)} Web pages verified clean.")
+    print(f"OK: {len(py_items)} Python demos compiled, {len(web_items)} Web pages verified clean.")
     return 0
+
+
+def build_catalog() -> int:
+    script = ROOT / "scripts" / "build_catalog.py"
+    if not script.is_file():
+        print("Error: scripts/build_catalog.py not found.")
+        return 1
+    res = subprocess.run([sys.executable, str(script)], check=False)
+    return res.returncode
 
 
 def serve_web(port: int = 8080) -> None:
@@ -71,28 +69,39 @@ def serve_web(port: int = 8080) -> None:
 
 
 def interactive_menu() -> None:
-    print("\n=== ✨ Visual Art Gallery 启动器 ===")
-    print("  [0] 🌐 启动本地 Web 展厅 (浏览器打开全部 HTML5 Canvas 特效)")
-    for idx, (title, rel) in enumerate(PYTHON_DEMOS, start=1):
-        print(f"  [{idx}] 🐍 {title}  ({rel})")
+    data = load_gallery()
+    py_items = data.get("python", [])
+    print(f"\n=== ✨ Visual Art Gallery 启动器 (共 {len(py_items)} 个桌面动画) ===")
+    print("  [0] 🌐 启动本地 Web 展厅 (浏览器打开全部 HTML5 Canvas / WebGL 特效)")
+    for idx, item in enumerate(py_items, start=1):
+        print(f"  [{idx:2d}] 🐍 {item['title']}  ({item.get('rel', '')})")
+    print("  [b] 🛠️ 重新生成 index.html 与 README.md (Build)")
+    print("  [c] 🔍 运行代码语法与完整性自检 (Check)")
     print("  [q] 退出")
 
-    choice = input("\n请输入编号运行对应展示: ").strip().lower()
+    choice = input("\n请输入选项或编号: ").strip().lower()
     if choice in ("q", "quit", "exit", ""):
         return
     if choice == "0":
         serve_web()
         return
-    if choice.isdigit() and 1 <= int(choice) <= len(PYTHON_DEMOS):
-        _, rel = PYTHON_DEMOS[int(choice) - 1]
-        subprocess.run([sys.executable, str(ROOT / rel)], check=False)
+    if choice == "b":
+        build_catalog()
+        return
+    if choice == "c":
+        self_check()
+        return
+    if choice.isdigit() and 1 <= int(choice) <= len(py_items):
+        item = py_items[int(choice) - 1]
+        subprocess.run([sys.executable, str(ROOT / item["rel"])], check=False)
     else:
         print("无效编号。")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Visual Art Gallery Runner")
+    parser = argparse.ArgumentParser(description="Visual Art Gallery Runner & Automation")
     parser.add_argument("--check", action="store_true", help="Compile-check all Python scripts & audit Web files")
+    parser.add_argument("--build", action="store_true", help="Rebuild index.html & README.md from gallery.json")
     parser.add_argument("--list", action="store_true", help="List all curated demos")
     parser.add_argument("--web", action="store_true", help="Launch local HTTP server and open gallery index.html")
     parser.add_argument("--port", type=int, default=8080, help="Port for --web server")
@@ -100,16 +109,24 @@ def main() -> int:
 
     if args.check:
         return self_check()
+    if args.build:
+        return build_catalog()
     if args.list:
-        for title, rel in PYTHON_DEMOS + WEB_DEMOS:
-            print(f"{title:36s} -> {rel}")
+        data = load_gallery()
+        print(f"Python Demos ({len(data.get('python', []))}):")
+        for p in data.get("python", []):
+            print(f"  - {p['title']} -> {p['rel']}")
+        print(f"\nWeb Demos ({len(data.get('web', []))}):")
+        for w in data.get("web", []):
+            print(f"  - {w['title']} -> {w['url']}")
         return 0
     if args.web:
         serve_web(args.port)
         return 0
+
     interactive_menu()
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

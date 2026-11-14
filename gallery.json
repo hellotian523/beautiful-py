@@ -1,0 +1,214 @@
+{
+  "web": [
+    {
+      "id": "webgl_fluid",
+      "type": "web",
+      "tag": "WebGL · 殿堂开源",
+      "title": "Navier-Stokes 流体动力学模拟",
+      "desc": "PavelDoGreat (★16.8k, MIT)。电影级 HDR Bloom 泛光 + Sunrays 体积光束，极度丝滑的发光流体与多触点流光。",
+      "url": "web/webgl-fluid/index.html",
+      "icon": "🌊",
+      "author": "PavelDoGreat",
+      "license": "MIT",
+      "stars": "16.8k"
+    },
+    {
+      "id": "the_spirit",
+      "type": "web",
+      "tag": "WebGL GPGPU · 殿堂开源",
+      "title": "The Spirit — 3D 旋度噪声灵体",
+      "desc": "Edan Kwan (★1.3k, MIT)。GPGPU FBO + 3D Curl-Noise + 空间实时体积阴影，几十万发光粒子在三维空间翻涌成烟雾灵体。",
+      "url": "web/the-spirit/index.html",
+      "icon": "👻",
+      "author": "Edan Kwan",
+      "license": "MIT",
+      "stars": "1.3k"
+    },
+    {
+      "id": "volumetric_flow",
+      "type": "web",
+      "tag": "WebGL · 殿堂开源",
+      "title": "Volumetric Flow — 三维体积粒子流",
+      "desc": "David Li (★934, MIT)。GPU 实时解算矢量场流体碰撞与光晕散射，鼠标拖拽拉出如烟似绸的发光立体丝带。",
+      "url": "web/volumetric-flow/index.html",
+      "icon": "💫",
+      "author": "David Li",
+      "license": "MIT",
+      "stars": "934"
+    },
+    {
+      "id": "celestial_phoenix",
+      "type": "web",
+      "tag": "Web 3D Volumetric · 镇馆原创",
+      "title": "冰蓝金羽·流光星尘凤凰",
+      "desc": "多层半透明飞羽骨骼拍翼 + 16条丝绸纱幔流体长尾与流金星尘尾迹，支持鼠标牵引翱翔、三套神鸟配色与代码暗纹切换。",
+      "url": "web/celestial-phoenix/index.html",
+      "img": "assets/previews/celestial_phoenix.png"
+    },
+    {
+      "id": "3d_spiral_tree",
+      "type": "web",
+      "tag": "Web 3D Canvas · 原创",
+      "title": "3D 流光旋转粒子圣诞树",
+      "desc": "支持鼠标视差拖拽与三种流光主题切换的 3D 螺旋粒子树与漫天飞雪。",
+      "url": "web/3d-spiral-tree/index.html",
+      "icon": "🎄"
+    },
+    {
+      "id": "aurora_cosmos",
+      "type": "web",
+      "tag": "Web Flow Field · 原创",
+      "title": "极光流体引力星云",
+      "desc": "1500+ 发光粒子构成的流体向量场，支持鼠标漩涡牵引与点击冲击波换色。",
+      "url": "web/aurora-cosmos/index.html",
+      "icon": "🌌"
+    },
+    {
+      "id": "firework_text",
+      "type": "web",
+      "tag": "Web Canvas",
+      "title": "烟花绽放凝聚文字",
+      "desc": "漫天彩色烟花升空绽放后自动汇聚成发光祝福文字（支持 ?text=自定义文字）。",
+      "url": "web/firework-text/index.html",
+      "img": "assets/previews/firework_text.png"
+    },
+    {
+      "id": "shape_shifter",
+      "type": "web",
+      "tag": "Web 3D + Shape Shifter",
+      "title": "3D 空间烟花与粒子字变换",
+      "desc": "3D 透视网格烟花搭配粒子动态重组倒计时与祝福文字。",
+      "url": "web/shape-shifter-particles/index.html",
+      "img": "assets/previews/shape_shifter.jpg"
+    },
+    {
+      "id": "fireworks_celebration",
+      "type": "web",
+      "tag": "Web Canvas",
+      "title": "全屏庆典烟花秀",
+      "desc": "高饱和度多束礼花绽放动画，已彻底净化原文件悬浮广告。",
+      "url": "web/fireworks-celebration/index.html",
+      "icon": "🎆"
+    },
+    {
+      "id": "cake_confetti",
+      "type": "web",
+      "tag": "CSS3 + Splitting",
+      "title": "彩色礼花生日蛋糕",
+      "desc": "字符拆分跳动特效与缤纷纸屑飘落庆典动画。",
+      "url": "web/cake-confetti/index.html",
+      "img": "assets/previews/cake_confetti.jpg"
+    },
+    {
+      "id": "neon_spotlight",
+      "type": "web",
+      "tag": "CSS3 Neon",
+      "title": "霓虹聚光灯扫描特效",
+      "desc": "纯 CSS3 clip-path 实现的彩虹霓虹聚光灯扫光文字。",
+      "url": "web/neon-spotlight/index.html",
+      "icon": "🌈"
+    }
+  ],
+  "python": [
+    {
+      "id": "neon_mandala",
+      "type": "python",
+      "tag": "Python Turtle · 原创",
+      "title": "霓虹万花筒神圣几何曼陀罗",
+      "desc": "基于 HSV 色彩空间与黄金角螺旋生成的暗黑霓虹几何艺术。",
+      "cmd": "python python/generative/neon_mandala_turtle.py",
+      "rel": "python/generative/neon_mandala_turtle.py",
+      "icon": "🔮"
+    },
+    {
+      "id": "starry_fireworks",
+      "type": "python",
+      "tag": "Python Tkinter · 原创",
+      "title": "60FPS 星空引力交互烟花秀",
+      "desc": "纯标准库 Tkinter 物理粒子烟花，支持鼠标点击任意坐标定制发射。",
+      "cmd": "python python/generative/starry_fireworks_tk.py",
+      "rel": "python/generative/starry_fireworks_tk.py",
+      "icon": "🌠"
+    },
+    {
+      "id": "beating_heart",
+      "type": "python",
+      "tag": "Python Tkinter",
+      "title": "3D 跳动粒子光环爱心",
+      "desc": "数千颗粒子按心形参数方程与周期力场呼吸跳动。",
+      "cmd": "python python/hearts_and_characters/beating_particle_heart.py",
+      "rel": "python/hearts_and_characters/beating_particle_heart.py",
+      "img": "assets/previews/beating_particle_heart.jpg"
+    },
+    {
+      "id": "lotso_bear",
+      "type": "python",
+      "tag": "Python Turtle",
+      "title": "草莓熊手持玫瑰花",
+      "desc": "660+ 行精细贝塞尔圆弧绘制草莓熊与多层渐变玫瑰。",
+      "cmd": "python python/hearts_and_characters/lotso_bear_rose.py",
+      "rel": "python/hearts_and_characters/lotso_bear_rose.py",
+      "img": "assets/previews/lotso_bear_rose.png"
+    },
+    {
+      "id": "floating_hearts",
+      "type": "python",
+      "tag": "Python Turtle",
+      "title": "满屏浪漫漂浮爱心",
+      "desc": "双缓冲帧动画实现多色爱心正弦摇曳上升。",
+      "cmd": "python python/hearts_and_characters/floating_hearts.py",
+      "rel": "python/hearts_and_characters/floating_hearts.py",
+      "icon": "💗"
+    },
+    {
+      "id": "night_tree",
+      "type": "python",
+      "tag": "Python Turtle",
+      "title": "黑夜童话装饰圣诞树",
+      "desc": "黑底绿树搭配圣诞帽、拐杖糖、圣诞袜与六角雪花。",
+      "cmd": "python python/trees/night_decorated_tree.py",
+      "rel": "python/trees/night_decorated_tree.py",
+      "img": "assets/previews/night_decorated_tree.png"
+    },
+    {
+      "id": "fractal_tree",
+      "type": "python",
+      "tag": "Python Turtle",
+      "title": "经典分形彩灯落雪圣诞树",
+      "desc": "递归分形树冠随机点缀彩灯与漫天六角雪花。",
+      "cmd": "python python/trees/fractal_christmas_tree.py",
+      "rel": "python/trees/fractal_christmas_tree.py",
+      "img": "assets/previews/fractal_christmas_tree.jpg"
+    },
+    {
+      "id": "pink_ribbon_tree",
+      "type": "python",
+      "tag": "Python Turtle",
+      "title": "少女粉蝴蝶结圣诞树",
+      "desc": "粉色系波浪树冠搭配大小蝴蝶结与星星挂饰。",
+      "cmd": "python python/trees/pink_ribbon_tree.py",
+      "rel": "python/trees/pink_ribbon_tree.py",
+      "img": "assets/previews/pink_ribbon_tree.jpg"
+    },
+    {
+      "id": "sakura_tree",
+      "type": "python",
+      "tag": "Python Turtle",
+      "title": "动态分形樱花落花树",
+      "desc": "随机分形树干生长与珊瑚粉花瓣飘落。",
+      "cmd": "python python/trees/sakura_fractal_tree.py",
+      "rel": "python/trees/sakura_fractal_tree.py",
+      "icon": "🌸"
+    },
+    {
+      "id": "love_tree",
+      "type": "python",
+      "tag": "Python Turtle",
+      "title": "浪漫爱心叶片分形树",
+      "desc": "递归分形枝干末端绽放满树粉红爱心叶片。",
+      "cmd": "python python/trees/love_heart_tree.py",
+      "rel": "python/trees/love_heart_tree.py",
+      "icon": "🌳"
+    }
+  ]
+}
