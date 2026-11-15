@@ -77,6 +77,10 @@ def interactive_menu() -> None:
         print(f"  [{idx:2d}] 🐍 {item['title']}  ({item.get('rel', '')})")
     print("  [b] 🛠️ 重新生成 index.html 与 README.md (Build)")
     print("  [c] 🔍 运行代码语法与完整性自检 (Check)")
+    print("  [n] 🎨 新建 Python 动画模板 (--new-python)")
+    print("  [w] ✨ 新建 Web 交互特效模板 (--new-web)")
+    print("  [r] 🔭 运行开源视觉雷达追踪 (--radar)")
+
     print("  [q] 退出")
 
     choice = input("\n请输入选项或编号: ").strip().lower()
@@ -91,6 +95,22 @@ def interactive_menu() -> None:
     if choice == "c":
         self_check()
         return
+    if choice == "n":
+        name = input("请输入新 Python 动画名称 (英文标识符): ").strip()
+        if name:
+            from scripts.scaffold import new_python
+            new_python(name)
+        return
+    if choice == "w":
+        name = input("请输入新 Web 特效名称 (英文标识符): ").strip()
+        if name:
+            from scripts.scaffold import new_web
+            new_web(name)
+        return
+    if choice == "r":
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "trend_tracker.py")], check=True)
+        return
+
     if choice.isdigit() and 1 <= int(choice) <= len(py_items):
         item = py_items[int(choice) - 1]
         subprocess.run([sys.executable, str(ROOT / item["rel"])], check=False)
@@ -105,6 +125,12 @@ def main() -> int:
     parser.add_argument("--list", action="store_true", help="List all curated demos")
     parser.add_argument("--web", action="store_true", help="Launch local HTTP server and open gallery index.html")
     parser.add_argument("--port", type=int, default=8080, help="Port for --web server")
+    parser.add_argument("--new-python", metavar="NAME", help="Create new Python generative demo from template")
+    parser.add_argument("--new-web", metavar="NAME", help="Create new Web Canvas visual demo from template")
+    parser.add_argument("--template", default="turtle", choices=["turtle", "tkinter"], help="Template type for --new-python")
+    parser.add_argument("--import", "--import-path", metavar="PATH", dest="import_path", help="Import local python or web demo into gallery")
+    parser.add_argument("--radar", action="store_true", help="Run visual art trend radar locally")
+
     args = parser.parse_args()
 
     if args.check:
@@ -123,6 +149,22 @@ def main() -> int:
     if args.web:
         serve_web(args.port)
         return 0
+    if args.new_python:
+        from scripts.scaffold import new_python
+        new_python(args.new_python, tmpl=args.template)
+        return 0
+    if args.new_web:
+        from scripts.scaffold import new_web
+        new_web(args.new_web)
+        return 0
+    if args.import_path:
+        from scripts.scaffold import import_local
+        import_local(args.import_path)
+        return 0
+    if args.radar:
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "trend_tracker.py")], check=True)
+        return 0
+
 
     interactive_menu()
     return 0

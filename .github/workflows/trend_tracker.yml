@@ -1,0 +1,32 @@
+name: Weekly Visual Art Trend Radar
+
+on:
+  schedule:
+    - cron: "0 0 * * 1" # 每周一 00:00 UTC 触发
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  track-trends:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate Trend Report
+        run: |
+          python scripts/trend_tracker.py
+
+      - name: Create or Update Issue
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "🔭 [Weekly Radar] 创意视觉与生成艺术前沿开源推荐"
+          content-filepath: "trend_report.md"
+          labels: "radar, automated, showcase-suggestion"
