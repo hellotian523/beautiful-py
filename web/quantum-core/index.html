@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D 全息量子能量核心 — Holographic Quantum Core</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #02040a; font-family: system-ui, -apple-system, sans-serif;
+      user-select: none;
+    }
+    canvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
+    .hint {
+      position: fixed; top: 18px; left: 22px;
+      color: rgba(186, 230, 253, 0.7); font-size: 13px;
+      letter-spacing: 0.05em; pointer-events: none; z-index: 10;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+    }
+    .hud {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;
+      padding: 8px 18px; border-radius: 999px;
+      background: rgba(7, 12, 28, 0.72);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+    .hud button {
+      background: rgba(15, 23, 42, 0.6);
+      color: #bae6fd; border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 6px 14px; border-radius: 999px; font-size: 12.5px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .hud button:hover, .hud button.active {
+      background: linear-gradient(135deg, #0284c7, #818cf8);
+      color: #fff; font-weight: 700; border-color: transparent;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="hint">⚡ 移动鼠标改变三维视角与能量聚束 · 点击触发核心超频过载脉冲</div>
+  <canvas id="c"></canvas>
+  <div class="hud">
+    <button class="active" data-theme="0">💠 量子青蓝</button>
+    <button data-theme="1">☀️ 恒星聚变</button>
+    <button data-theme="2">🔮 虚空暗质</button>
+    <button data-theme="3">🌿 赛博翠晶</button>
+    <button id="btn-pulse">💥 核心超频脉冲</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+    let w, h, dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    const THEMES = [
+      { name: "Cyan", primary: [56, 189, 248], secondary: [129, 140, 248], core: "#e0f2fe" },
+      { name: "Solar", primary: [245, 158, 11], secondary: [239, 68, 68], core: "#fef08a" },
+      { name: "Void", primary: [168, 85, 247], secondary: [236, 72, 153], core: "#fdf4ff" },
+      { name: "Emerald", primary: [16, 185, 129], secondary: [59, 130, 246], core: "#d1fae5" },
+    ];
+    let curTheme = 0;
+    let pulseWave = 0.0;
+
+    let targetRotX = 0, targetRotY = 0;
+    let rotX = 0, rotY = 0;
+    window.addEventListener("mousemove", e => {
+      targetRotY = (e.clientX / w - 0.5) * 1.6;
+      targetRotX = (e.clientY / h - 0.5) * 1.2;
+    });
+
+    window.addEventListener("click", e => {
+      if (e.target.tagName === "BUTTON") return;
+      triggerPulse();
+    });
+    document.getElementById("btn-pulse").addEventListener("click", triggerPulse);
+
+    function triggerPulse() {
+      pulseWave = 1.0;
+    }
+
+    document.querySelectorAll(".hud button[data-theme]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".hud button[data-theme]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        curTheme = parseInt(btn.dataset.theme, 10);
+      });
+    });
+
+    // Quantum Particles
+    const PARTICLE_COUNT = 1400;
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.theta = Math.random() * Math.PI * 2;
+        this.phi = Math.acos(Math.random() * 2 - 1);
+        this.r = 110 + Math.random() * 240;
+        this.baseR = this.r;
+        this.speed = (0.008 + Math.random() * 0.016) * (Math.random() > 0.5 ? 1 : -1);
+        this.size = Math.random() * 2.2 + 0.8;
+        this.hueShift = Math.random() * 0.2 - 0.1;
+      }
+      update(t, pulse) {
+        this.theta += this.speed * (1 + pulse * 2.5);
+        this.phi += Math.sin(t * 0.5 + this.theta) * 0.003;
+        this.r = this.baseR + Math.sin(t * 2.0 + this.theta * 3.0) * 15 + pulse * 120;
+      }
+    }
+    const particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle());
+
+    // 3D Point Projection
+    function project(x, y, z) {
+      // Rotate around X (pitch)
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+      const y1 = y * cosX - z * sinX;
+      const z1 = y * sinX + z * cosX;
+
+      // Rotate around Y (yaw)
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const x2 = x * cosY + z1 * sinY;
+      const z2 = -x * sinY + z1 * cosY;
+
+      const fov = 420;
+      const scale = fov / (fov + z2 + 280);
+      return {
+        x: w / 2 + x2 * scale,
+        y: h / 2 + y1 * scale,
+        scale: scale,
+        z: z2
+      };
+    }
+
+    // Draw Gimbal Rings
+    function drawRing(radius, rotAxis, speed, segments = 80) {
+      const th = THEMES[curTheme];
+      const pts = [];
+      const angleOffset = performance.now() * 0.001 * speed;
+
+      for (let i = 0; i <= segments; i++) {
+        const a = (i / segments) * Math.PI * 2;
+        let px = 0, py = 0, pz = 0;
+        if (rotAxis === "x") {
+          px = Math.cos(a) * radius;
+          py = Math.sin(a) * radius * Math.cos(angleOffset);
+          pz = Math.sin(a) * radius * Math.sin(angleOffset);
+        } else if (rotAxis === "y") {
+          px = Math.cos(a) * radius * Math.cos(angleOffset);
+          py = Math.sin(a) * radius;
+          pz = Math.cos(a) * radius * Math.sin(angleOffset);
+        } else {
+          px = Math.cos(a + angleOffset) * radius;
+          py = Math.sin(a + angleOffset) * radius;
+          pz = Math.sin((a + angleOffset) * 3) * 18;
+        }
+        pts.push(project(px, py, pz));
+      }
+
+      ctx.beginPath();
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.strokeStyle = `rgba(${th.primary[0]}, ${th.primary[1]}, ${th.primary[2]}, 0.45)`;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      // Draw Laser Nodes on the Ring
+      for (let i = 0; i < segments; i += 16) {
+        const p = pts[i];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3 * p.scale, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${th.secondary[0]}, ${th.secondary[1]}, ${th.secondary[2]}, 0.9)`;
+        ctx.shadowColor = `rgb(${th.secondary[0]}, ${th.secondary[1]}, ${th.secondary[2]})`;
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    let lastTime = performance.now();
+    function animate(currentTime) {
+      const dt = (currentTime - lastTime) * 0.001;
+      lastTime = currentTime;
+      const t = currentTime * 0.001;
+
+      rotX += (targetRotX - rotX) * 0.06;
+      rotY += (targetRotY - rotY) * 0.06;
+      pulseWave = Math.max(0.0, pulseWave - dt * 1.5);
+
+      // Deep space dark trail clear
+      ctx.fillStyle = "rgba(2, 4, 10, 0.28)";
+      ctx.fillRect(0, 0, w, h);
+
+      const th = THEMES[curTheme];
+
+      // 1. Draw Dyson Rings
+      drawRing(170, "x", 0.65);
+      drawRing(210, "y", -0.5);
+      drawRing(250, "z", 0.35);
+
+      // 2. Central Quantum Plasma Core
+      const coreProj = project(0, 0, 0);
+      const coreRad = (55 + Math.sin(t * 4.0) * 6 + pulseWave * 45) * coreProj.scale;
+
+      // Core Outer Aura
+      const aura = ctx.createRadialGradient(coreProj.x, coreProj.y, 0, coreProj.x, coreProj.y, coreRad * 3.2);
+      aura.addColorStop(0, `rgba(${th.primary[0]}, ${th.primary[1]}, ${th.primary[2]}, ${0.7 + pulseWave * 0.3})`);
+      aura.addColorStop(0.4, `rgba(${th.secondary[0]}, ${th.secondary[1]}, ${th.secondary[2]}, 0.25)`);
+      aura.addColorStop(1, "rgba(2, 4, 10, 0)");
+      ctx.fillStyle = aura;
+      ctx.beginPath();
+      ctx.arc(coreProj.x, coreProj.y, coreRad * 3.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core Solid Orb
+      const orbGrad = ctx.createRadialGradient(coreProj.x - coreRad * 0.3, coreProj.y - coreRad * 0.3, 0, coreProj.x, coreProj.y, coreRad);
+      orbGrad.addColorStop(0, "#ffffff");
+      orbGrad.addColorStop(0.3, th.core);
+      orbGrad.addColorStop(0.7, `rgb(${th.primary[0]}, ${th.primary[1]}, ${th.primary[2]})`);
+      orbGrad.addColorStop(1, `rgb(${th.secondary[0]}, ${th.secondary[1]}, ${th.secondary[2]})`);
+      ctx.fillStyle = orbGrad;
+      ctx.beginPath();
+      ctx.arc(coreProj.x, coreProj.y, coreRad, 0, Math.PI * 2);
+      ctx.shadowColor = `rgb(${th.primary[0]}, ${th.primary[1]}, ${th.primary[2]})`;
+      ctx.shadowBlur = 25 + pulseWave * 40;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // 3. Render 1400 Quantum Stardust Particles
+      const renderList = [];
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.update(t, pulseWave);
+        const px = p.r * Math.sin(p.phi) * Math.cos(p.theta);
+        const py = p.r * Math.sin(p.phi) * Math.sin(p.theta);
+        const pz = p.r * Math.cos(p.phi);
+        const proj = project(px, py, pz);
+        renderList.push({ proj, p });
+      }
+
+      // Sort by depth for correct 3D occluding
+      renderList.sort((a, b) => b.proj.z - a.proj.z);
+
+      for (let i = 0; i < renderList.length; i++) {
+        const { proj, p } = renderList[i];
+        if (proj.scale <= 0) continue;
+
+        const alpha = Math.min(1.0, (proj.scale * 0.8) + 0.2);
+        const size = p.size * proj.scale * (1 + pulseWave * 0.8);
+
+        ctx.fillStyle = `rgba(${th.primary[0]}, ${th.primary[1]}, ${th.primary[2]}, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(proj.x, proj.y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

@@ -13,7 +13,7 @@
 
 ---
 
-## 📂 作品目录（共 21 个精选与原创展示）
+## 📂 作品目录（共 26 个精选与原创展示）
 
 
 ### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
@@ -26,6 +26,9 @@
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点 / 原作者说明 |
 | :--- | :--- | :--- |
+| **3D 赛博矩阵数字雨** | [`web/matrix-rain/index.html`](web/matrix-rain/index.html) | 多景深平面的赛博朋克代码流，支持鼠标深度视差透视、点击电磁扰动冲击波与四套霓虹色系切换。 |
+| **3D 全息量子能量核心** | [`web/quantum-core/index.html`](web/quantum-core/index.html) | 三轴万向节戴森环与 1400 颗量子星尘环绕的等离子脉冲核心，支持鼠标 3D 悬浮视差与超频过载脉冲。 |
+| **黑洞引力透镜与吸积盘** | [`web/black-hole/index.html`](web/black-hole/index.html) | 基于广义相对论测地线光线步进 (Raymarching)，实时渲染事件视界、光子圈、相对论多普勒光变吸积盘与扭曲星空。 |
 | **Navier-Stokes 流体动力学模拟** | [`web/webgl-fluid/index.html`](web/webgl-fluid/index.html) | [PavelDoGreat](https://github.com/PavelDoGreat) (★16.8k, MIT)。PavelDoGreat (★16.8k, MIT)。电影级 HDR Bloom 泛光 + Sunrays 体积光束，极度丝滑的发光流体与多触点流光。 |
 | **The Spirit — 3D 旋度噪声灵体** | [`web/the-spirit/index.html`](web/the-spirit/index.html) | [Edan Kwan](https://github.com/Edan Kwan) (★1.3k, MIT)。Edan Kwan (★1.3k, MIT)。GPGPU FBO + 3D Curl-Noise + 空间实时体积阴影，几十万发光粒子在三维空间翻涌成烟雾灵体。 |
 | **Volumetric Flow — 三维体积粒子流** | [`web/volumetric-flow/index.html`](web/volumetric-flow/index.html) | [David Li](https://github.com/David Li) (★934, MIT)。David Li (★934, MIT)。GPU 实时解算矢量场流体碰撞与光晕散射，鼠标拖拽拉出如烟似绸的发光立体丝带。 |
@@ -41,6 +44,8 @@
 ### 🐍 Python 桌面动画展示（标准库 `turtle` & `tkinter`，零安装）
 | 作品 | 路径 | 亮点说明 |
 | :--- | :--- | :--- |
+| **60FPS 双星系引力碰撞模拟** | [`python/generative/galaxy_collision_tk.py`](python/generative/galaxy_collision_tk.py) | 1200+ 颗恒星受双超大质量黑洞引力摄动拉出壮丽潮汐尾与引力桥，支持鼠标点击生成临时引力奇点。 |
+| **3D 洛伦兹奇异吸引子** | [`python/generative/lorenz_attractor_3d.py`](python/generative/lorenz_attractor_3d.py) | 基于三维投影与 Runge-Kutta 混沌方程实时绘制蝴蝶翅膀，支持鼠标任意拖拽三维视角与变色。 |
 | **霓虹万花筒神圣几何曼陀罗** | [`python/generative/neon_mandala_turtle.py`](python/generative/neon_mandala_turtle.py) | 基于 HSV 色彩空间与黄金角螺旋生成的暗黑霓虹几何艺术。 |
 | **60FPS 星空引力交互烟花秀** | [`python/generative/starry_fireworks_tk.py`](python/generative/starry_fireworks_tk.py) | 纯标准库 Tkinter 物理粒子烟花，支持鼠标点击任意坐标定制发射。 |
 | **3D 跳动粒子光环爱心** | [`python/hearts_and_characters/beating_particle_heart.py`](python/hearts_and_characters/beating_particle_heart.py) | 数千颗粒子按心形参数方程与周期力场呼吸跳动。 |

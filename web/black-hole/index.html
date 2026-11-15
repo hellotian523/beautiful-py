@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>黑洞引力透镜与吸积盘 — Relativistic Black Hole</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #000; font-family: system-ui, -apple-system, sans-serif;
+      user-select: none;
+    }
+    canvas { display: block; width: 100vw; height: 100vh; cursor: grab; }
+    canvas:active { cursor: grabbing; }
+    .hint {
+      position: fixed; top: 18px; left: 22px;
+      color: rgba(224, 242, 254, 0.7); font-size: 13px;
+      letter-spacing: 0.05em; pointer-events: none; z-index: 10;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+    }
+    .hud {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;
+      padding: 8px 18px; border-radius: 999px;
+      background: rgba(8, 12, 24, 0.72);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+    .hud button {
+      background: rgba(30, 41, 59, 0.6);
+      color: #fef08a; border: 1px solid rgba(251, 191, 36, 0.3);
+      padding: 6px 14px; border-radius: 999px; font-size: 12.5px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .hud button:hover, .hud button.active {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #030712; font-weight: 700; border-color: transparent;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="hint">🌌 拖拽鼠标旋转 3D 视角 · 滚轮缩放 · 观察极端引力弯曲与相对论多普勒频移</div>
+  <canvas id="glcanvas"></canvas>
+  <div class="hud">
+    <button class="active" data-theme="0">🌟 星际炽金 (Gargantua)</button>
+    <button data-theme="1">⚡ 赛博青蓝 (Cyberspace)</button>
+    <button data-theme="2">🩸 猩红视界 (Crimson)</button>
+    <button id="btn-doppler">💫 相对论光变: 开</button>
+  </div>
+
+  <script id="vs" type="x-shader/x-vertex">
+    attribute vec2 a_pos;
+    void main() {
+      gl_Position = vec4(a_pos, 0.0, 1.0);
+    }
+  </script>
+
+  <script id="fs" type="x-shader/x-fragment">
+    precision highp float;
+    uniform vec2 u_res;
+    uniform float u_time;
+    uniform vec2 u_rot;
+    uniform float u_zoom;
+    uniform int u_theme;
+    uniform bool u_doppler;
+
+    const float RS = 1.0;          // Schwarzschild radius
+    const float R_IN = 2.4;        // Disk inner radius
+    const float R_OUT = 7.5;       // Disk outer radius
+    const int MAX_STEPS = 110;
+
+    // Fast 3D Simplex noise
+    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+    vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+    float snoise(vec3 v) {
+      const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+      const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+      vec3 i  = floor(v + dot(v, C.yyy));
+      vec3 x0 = v - i + dot(i, C.xxx);
+      vec3 g = step(x0.yzx, x0.xyz);
+      vec3 l = 1.0 - g;
+      vec3 i1 = min(g.xyz, l.zxy);
+      vec3 i2 = max(g.xyz, l.zxy);
+      vec3 x1 = x0 - i1 + C.xxx;
+      vec3 x2 = x0 - i2 + C.yyy;
+      vec3 x3 = x0 - D.yyy;
+      i = mod289(i);
+      vec4 p = permute(permute(permute(
+                i.z + vec4(0.0, i1.z, i2.z, 1.0))
+              + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+              + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+      float n_ = 0.142857142857;
+      vec3  ns = n_ * D.wyz - D.xzx;
+      vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+      vec4 x_ = floor(j * ns.z);
+      vec4 y_ = floor(j - 7.0 * x_);
+      vec4 x = x_ *ns.x + ns.yyyy;
+      vec4 y = y_ *ns.x + ns.yyyy;
+      vec4 h = 1.0 - abs(x) - abs(y);
+      vec4 b0 = vec4(x.xy, y.xy);
+      vec4 b1 = vec4(x.zw, y.zw);
+      vec4 s0 = floor(b0)*2.0 + 1.0;
+      vec4 s1 = floor(b1)*2.0 + 1.0;
+      vec4 sh = -step(h, vec4(0.0));
+      vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+      vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+      vec3 p0 = vec3(a0.xy, h.x);
+      vec3 p1 = vec3(a0.zw, h.y);
+      vec3 p2 = vec3(a1.xy, h.z);
+      vec3 p3 = vec3(a1.zw, h.w);
+      vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+      p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+      vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+      m = m * m;
+      return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+    }
+
+    // Distant star background
+    vec3 backgroundStars(vec3 dir) {
+      float stars = pow(clamp(snoise(dir * 60.0), 0.0, 1.0), 18.0) * 8.0;
+      stars += pow(clamp(snoise(dir * 18.0), 0.0, 1.0), 8.0) * 0.4;
+      vec3 nebula = vec3(0.015, 0.02, 0.04) + vec3(0.04, 0.02, 0.06) * sin(dir.x * 2.0 + dir.y * 3.0);
+      return nebula + vec3(stars);
+    }
+
+    void main() {
+      vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
+
+      // Camera setup with yaw & pitch
+      float yaw = u_rot.x;
+      float pitch = u_rot.y;
+      vec3 ro = vec3(0.0, 0.0, -u_zoom);
+
+      // Rotate camera
+      mat3 rotY = mat3(
+        cos(yaw), 0.0, sin(yaw),
+        0.0, 1.0, 0.0,
+        -sin(yaw), 0.0, cos(yaw)
+      );
+      mat3 rotX = mat3(
+        1.0, 0.0, 0.0,
+        0.0, cos(pitch), -sin(pitch),
+        0.0, sin(pitch), cos(pitch)
+      );
+      ro = rotY * (rotX * ro);
+
+      vec3 fwd = normalize(-ro);
+      vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), fwd));
+      vec3 up = cross(fwd, right);
+      vec3 rd = normalize(fwd * 1.5 + right * uv.x + up * uv.y);
+
+      // Raymarching geodesic deflection
+      vec3 p = ro;
+      vec3 v = rd;
+      float dt = 0.14;
+      vec3 accColor = vec3(0.0);
+      float opacity = 0.0;
+      bool absorbed = false;
+
+      for (int i = 0; i < MAX_STEPS; i++) {
+        float r = length(p);
+        if (r < RS * 0.98) {
+          absorbed = true;
+          break;
+        }
+        if (r > 35.0) break;
+
+        // Gravitational light deflection
+        vec3 bend = -1.5 * RS * p / (r * r * r);
+        v += bend * dt;
+        v = normalize(v);
+        p += v * dt;
+
+        // Dynamic step length
+        dt = clamp(r * 0.055, 0.04, 0.45);
+
+        // Accretion disk intersection (disk in plane y = 0)
+        float h = abs(p.y);
+        float diskR = length(p.xz);
+        if (h < 0.22 && diskR > R_IN && diskR < R_OUT) {
+          // Keplerian rotation angle
+          float phi = atan(p.z, p.x);
+          float omega = 3.5 / pow(diskR, 1.5);
+          float angle = phi - omega * u_time * 0.8;
+
+          // Multi-octave disk turbulence
+          float noise = snoise(vec3(cos(angle) * diskR * 1.2, sin(angle) * diskR * 1.2, p.y * 3.0));
+          float density = smoothstep(R_IN, R_IN + 0.8, diskR) * (1.0 - smoothstep(R_OUT - 1.5, R_OUT, diskR));
+          density *= (1.0 - h / 0.22) * clamp(0.45 + 0.55 * noise, 0.0, 1.0);
+
+          if (density > 0.01) {
+            // Relativistic Doppler beaming
+            vec3 vDisk = normalize(vec3(-p.z, 0.0, p.x));
+            float doppler = 1.0;
+            if (u_doppler) {
+              float beta = 0.52 / sqrt(diskR);
+              float cosTheta = dot(v, vDisk);
+              doppler = pow(clamp(1.0 + beta * cosTheta, 0.2, 2.2), 3.5);
+            }
+
+            // Theme color ramp
+            vec3 baseCol = vec3(1.0, 0.65, 0.15);
+            if (u_theme == 1) baseCol = vec3(0.2, 0.75, 1.0);
+            else if (u_theme == 2) baseCol = vec3(1.0, 0.18, 0.25);
+
+            vec3 gasColor = baseCol * (1.2 + 0.8 * doppler) * (1.5 / pow(diskR, 0.8));
+            float stepAlpha = clamp(density * 0.28 * doppler, 0.0, 1.0);
+            accColor += gasColor * stepAlpha * (1.0 - opacity);
+            opacity += stepAlpha;
+            if (opacity > 0.95) break;
+          }
+        }
+      }
+
+      // Gravitational lensing background stars
+      vec3 finalCol = accColor;
+      if (!absorbed && opacity < 0.95) {
+        finalCol += backgroundStars(v) * (1.0 - opacity);
+      }
+
+      // Photon ring glow
+      float minD = length(cross(ro, rd));
+      if (minD > RS * 0.95 && minD < RS * 1.6) {
+        float glow = pow(1.0 - abs(minD - RS * 1.2) / (RS * 0.6), 6.0) * 0.65;
+        vec3 glowCol = (u_theme == 1) ? vec3(0.4, 0.85, 1.0) : vec3(1.0, 0.8, 0.4);
+        finalCol += glowCol * glow;
+      }
+
+      // Tonemapping & gamma
+      finalCol = finalCol / (finalCol + vec3(1.0));
+      finalCol = pow(finalCol, vec3(1.0 / 2.2));
+      gl_FragColor = vec4(finalCol, 1.0);
+    }
+  </script>
+
+  <script>
+    const canvas = document.getElementById("glcanvas");
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    if (!gl) {
+      document.body.innerHTML = "<h2 style='color:white;padding:40px'>WebGL 不受当前环境支持</h2>";
+    }
+
+    function createShader(gl, type, source) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+      }
+      return shader;
+    }
+
+    const vsSource = document.getElementById("vs").text;
+    const fsSource = document.getElementById("fs").text;
+    const prog = gl.createProgram();
+    gl.attachShader(prog, createShader(gl, gl.VERTEX_SHADER, vsSource));
+    gl.attachShader(prog, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    // Quad buffer
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -1, -1,  1, -1, -1,  1,
+      -1,  1,  1, -1,  1,  1
+    ]), gl.STATIC_DRAW);
+
+    const aPos = gl.getAttribLocation(prog, "a_pos");
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes = gl.getUniformLocation(prog, "u_res");
+    const uTime = gl.getUniformLocation(prog, "u_time");
+    const uRot = gl.getUniformLocation(prog, "u_rot");
+    const uZoom = gl.getUniformLocation(prog, "u_zoom");
+    const uTheme = gl.getUniformLocation(prog, "u_theme");
+    const uDoppler = gl.getUniformLocation(prog, "u_doppler");
+
+    let rotX = 0.45, rotY = 0.28;
+    let zoom = 12.0;
+    let currentTheme = 0;
+    let dopplerEnabled = true;
+    let dragging = false, lastX = 0, lastY = 0;
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    window.addEventListener("mousedown", e => {
+      dragging = true; lastX = e.clientX; lastY = e.clientY;
+    });
+    window.addEventListener("mousemove", e => {
+      if (dragging) {
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        rotX += dx * 0.006;
+        rotY = Math.max(-1.3, Math.min(1.3, rotY + dy * 0.006));
+        lastX = e.clientX; lastY = e.clientY;
+      }
+    });
+    window.addEventListener("mouseup", () => dragging = false);
+    window.addEventListener("wheel", e => {
+      zoom = Math.max(5.0, Math.min(22.0, zoom + e.deltaY * 0.015));
+    });
+
+    document.querySelectorAll(".hud button[data-theme]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".hud button[data-theme]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentTheme = parseInt(btn.dataset.theme, 10);
+      });
+    });
+
+    const dopplerBtn = document.getElementById("btn-doppler");
+    dopplerBtn.addEventListener("click", () => {
+      dopplerEnabled = !dopplerEnabled;
+      dopplerBtn.textContent = `💫 相对论光变: ${dopplerEnabled ? '开' : '关'}`;
+      dopplerBtn.style.borderColor = dopplerEnabled ? 'rgba(251, 191, 36, 0.8)' : 'rgba(148, 163, 184, 0.4)';
+    });
+
+    const startTime = performance.now();
+    function render() {
+      const t = (performance.now() - startTime) * 0.001;
+      if (!dragging) rotX += 0.002;
+
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uTime, t);
+      gl.uniform2f(uRot, rotX, rotY);
+      gl.uniform1f(uZoom, zoom);
+      gl.uniform1i(uTheme, currentTheme);
+      gl.uniform1i(uDoppler, dopplerEnabled ? 1 : 0);
+
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>

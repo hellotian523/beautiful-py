@@ -61,9 +61,9 @@
     <h1>✨ Visual Art & Creative Coding Gallery</h1>
     <p>精选与原创的高颜值视觉代码仓库：涵盖分形艺术树、3D 流光粒子、流体极光星云、跳动粒子爱心与烟花秀。Web 作品支持直接在浏览器或 GitHub Pages 在线交互预览，Python 作品可通过 <code>python run.py</code> 一键启动。</p>
     <div class="filters">
-      <button class="active" data-filter="all">全部作品 (21)</button>
-      <button data-filter="web">🌐 Web 在线交互 (11)</button>
-      <button data-filter="python">🐍 Python 桌面动画 (10)</button>
+      <button class="active" data-filter="all">全部作品 (26)</button>
+      <button data-filter="web">🌐 Web 在线交互 (14)</button>
+      <button data-filter="python">🐍 Python 桌面动画 (12)</button>
     </div>
   </header>
 
@@ -84,6 +84,30 @@
 
   <script>
     const ITEMS = [
+      {
+            "type": "web",
+            "tag": "Web 3D 视差 · 原创",
+            "title": "3D 赛博矩阵数字雨",
+            "desc": "多景深平面的赛博朋克代码流，支持鼠标深度视差透视、点击电磁扰动冲击波与四套霓虹色系切换。",
+            "url": "web/matrix-rain/index.html",
+            "icon": "🟩"
+      },
+      {
+            "type": "web",
+            "tag": "Web 3D 全息 · 原创",
+            "title": "3D 全息量子能量核心",
+            "desc": "三轴万向节戴森环与 1400 颗量子星尘环绕的等离子脉冲核心，支持鼠标 3D 悬浮视差与超频过载脉冲。",
+            "url": "web/quantum-core/index.html",
+            "icon": "💠"
+      },
+      {
+            "type": "web",
+            "tag": "WebGL 物理光线步进 · 原创",
+            "title": "黑洞引力透镜与吸积盘",
+            "desc": "基于广义相对论测地线光线步进 (Raymarching)，实时渲染事件视界、光子圈、相对论多普勒光变吸积盘与扭曲星空。",
+            "url": "web/black-hole/index.html",
+            "icon": "🕳️"
+      },
       {
             "type": "web",
             "tag": "WebGL · 殿堂开源",
@@ -171,6 +195,22 @@
             "desc": "纯 CSS3 clip-path 实现的彩虹霓虹聚光灯扫光文字。",
             "url": "web/neon-spotlight/index.html",
             "icon": "🌈"
+      },
+      {
+            "type": "python",
+            "tag": "Python Tkinter · 原创",
+            "title": "60FPS 双星系引力碰撞模拟",
+            "desc": "1200+ 颗恒星受双超大质量黑洞引力摄动拉出壮丽潮汐尾与引力桥，支持鼠标点击生成临时引力奇点。",
+            "cmd": "python python/generative/galaxy_collision_tk.py",
+            "icon": "🌌"
+      },
+      {
+            "type": "python",
+            "tag": "Python Turtle · 原创",
+            "title": "3D 洛伦兹奇异吸引子",
+            "desc": "基于三维投影与 Runge-Kutta 混沌方程实时绘制蝴蝶翅膀，支持鼠标任意拖拽三维视角与变色。",
+            "cmd": "python python/generative/lorenz_attractor_3d.py",
+            "icon": "🦋"
       },
       {
             "type": "python",

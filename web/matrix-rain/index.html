@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D 赛博矩阵数字雨 — Cyber Matrix Digital Rain</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #020502; font-family: "Courier New", Courier, monospace;
+      user-select: none;
+    }
+    canvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
+    .hint {
+      position: fixed; top: 18px; left: 22px;
+      color: rgba(187, 247, 208, 0.7); font-size: 13px;
+      letter-spacing: 0.05em; pointer-events: none; z-index: 10;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+    }
+    .hud {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;
+      padding: 8px 18px; border-radius: 999px;
+      background: rgba(4, 18, 6, 0.76);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+    .hud button {
+      background: rgba(10, 30, 15, 0.6);
+      color: #86efac; border: 1px solid rgba(74, 222, 128, 0.35);
+      padding: 6px 14px; border-radius: 999px; font-size: 12.5px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .hud button:hover, .hud button.active {
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      color: #021a08; font-weight: 700; border-color: transparent;
+      box-shadow: 0 0 16px rgba(34, 197, 94, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="hint">⚡ 移动鼠标触发 3D 视差透视 · 点击屏幕发射电磁扰动冲击波</div>
+  <canvas id="c"></canvas>
+  <div class="hud">
+    <button class="active" data-theme="0">🟩 经典黑客绿</button>
+    <button data-theme="1">🟦 赛博霓虹蓝</button>
+    <button data-theme="2">🟥 红色警戒流</button>
+    <button data-theme="3">🟪 虚空幽灵紫</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+    let w, h, dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    // Characters pool: authentic katakana, math, Latin runes
+    const CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789XYZΨΩΔΣλπ⚡★";
+
+    const THEMES = [
+      { name: "Green", head: "#ffffff", lead: "#86efac", body: "rgba(34, 197, 94,", glow: "#22c55e", bg: "#020703" },
+      { name: "Blue", head: "#ffffff", lead: "#7dd3fc", body: "rgba(14, 165, 233,", glow: "#0ea5e9", bg: "#02050c" },
+      { name: "Red", head: "#ffffff", lead: "#fca5a5", body: "rgba(239, 68, 68,", glow: "#ef4444", bg: "#0b0202" },
+      { name: "Purple", head: "#ffffff", lead: "#f0abfc", body: "rgba(217, 70, 239,", glow: "#d946ef", bg: "#08020b" },
+    ];
+    let curTheme = 0;
+
+    let mouseX = w / 2, mouseY = h / 2;
+    let shockwaves = [];
+
+    window.addEventListener("mousemove", e => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    window.addEventListener("click", e => {
+      if (e.target.tagName === "BUTTON") return;
+      shockwaves.push({ x: e.clientX, y: e.clientY, r: 10, maxR: 380, strength: 1.0 });
+    });
+
+    document.querySelectorAll(".hud button[data-theme]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".hud button[data-theme]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        curTheme = parseInt(btn.dataset.theme, 10);
+      });
+    });
+
+    class Column {
+      constructor(x, depth) {
+        this.x = x;
+        this.depth = depth; // 0.4 (far) to 1.4 (close)
+        this.fontSize = Math.floor(13 * depth);
+        this.speed = (3.5 + Math.random() * 5.5) * depth;
+        this.y = Math.random() * -h;
+        this.length = Math.floor(14 + Math.random() * 22);
+        this.chars = Array.from({ length: this.length }, () => CHARS[Math.floor(Math.random() * CHARS.length)]);
+        this.mutationTimer = 0;
+      }
+
+      update(dt) {
+        this.y += this.speed;
+        if (this.y - this.length * this.fontSize > h) {
+          this.y = -Math.random() * 200;
+          this.speed = (3.5 + Math.random() * 5.5) * this.depth;
+        }
+
+        // Randomly mutate characters
+        this.mutationTimer += dt;
+        if (this.mutationTimer > 0.08) {
+          this.mutationTimer = 0;
+          const idx = Math.floor(Math.random() * this.length);
+          this.chars[idx] = CHARS[Math.floor(Math.random() * CHARS.length)];
+        }
+      }
+
+      render(parallaxX, parallaxY) {
+        const th = THEMES[curTheme];
+        ctx.font = `${this.fontSize}px 'Courier New', monospace`;
+
+        // Apply 3D parallax displacement
+        const posX = this.x + parallaxX * (this.depth - 0.9) * 45;
+        let baseY = this.y + parallaxY * (this.depth - 0.9) * 35;
+
+        for (let i = 0; i < this.length; i++) {
+          const charY = baseY - i * this.fontSize;
+          if (charY < -this.fontSize || charY > h + this.fontSize) continue;
+
+          // Shockwave distortion
+          let offsetX = 0;
+          for (const sw of shockwaves) {
+            const dx = posX - sw.x;
+            const dy = charY - sw.y;
+            const dist = Math.hypot(dx, dy);
+            if (Math.abs(dist - sw.r) < 50) {
+              const force = (1 - Math.abs(dist - sw.r) / 50) * sw.strength * 40;
+              offsetX += (dx / dist) * force;
+            }
+          }
+
+          const ch = this.chars[i];
+          if (i === 0) {
+            // White-hot Leader glyph
+            ctx.fillStyle = th.head;
+            ctx.shadowColor = th.glow;
+            ctx.shadowBlur = 10 * this.depth;
+            ctx.fillText(ch, posX + offsetX, charY);
+            ctx.shadowBlur = 0;
+          } else if (i === 1) {
+            ctx.fillStyle = th.lead;
+            ctx.fillText(ch, posX + offsetX, charY);
+          } else {
+            const alpha = Math.max(0.08, (1 - i / this.length) * this.depth * 0.95);
+            ctx.fillStyle = `${th.body} ${alpha})`;
+            ctx.fillText(ch, posX + offsetX, charY);
+          }
+        }
+      }
+    }
+
+    // Populate 3 layers of depth columns
+    const columns = [];
+    const baseColWidth = 18;
+    const count = Math.ceil(w / baseColWidth);
+
+    for (let i = 0; i < count; i++) {
+      const x = i * baseColWidth + Math.random() * 6;
+      const depth = 0.5 + Math.random() * 0.9; // 0.5 ~ 1.4
+      columns.push(new Column(x, depth));
+    }
+    columns.sort((a, b) => a.depth - b.depth);
+
+    let lastT = performance.now();
+    function animate(t) {
+      const dt = (t - lastT) * 0.001;
+      lastT = t;
+
+      // Update shockwaves
+      for (let i = shockwaves.length - 1; i >= 0; i--) {
+        const sw = shockwaves[i];
+        sw.r += 240 * dt;
+        sw.strength = Math.max(0, 1 - sw.r / sw.maxR);
+        if (sw.r >= sw.maxR) {
+          shockwaves.splice(i, 1);
+        }
+      }
+
+      // Trail fade clear
+      const th = THEMES[curTheme];
+      ctx.fillStyle = th.bg;
+      ctx.globalAlpha = 0.28;
+      ctx.fillRect(0, 0, w, h);
+      ctx.globalAlpha = 1.0;
+
+      const parallaxX = (mouseX / w - 0.5);
+      const parallaxY = (mouseY / h - 0.5);
+
+      for (const col of columns) {
+        col.update(dt);
+        col.render(parallaxX, parallaxY);
+      }
+
+      // Draw shockwave energy rings
+      for (const sw of shockwaves) {
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${sw.strength * 0.45})`;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      }
+
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

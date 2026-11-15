@@ -1,6 +1,33 @@
 {
   "web": [
     {
+      "id": "matrix_rain",
+      "type": "web",
+      "tag": "Web 3D 视差 · 原创",
+      "title": "3D 赛博矩阵数字雨",
+      "desc": "多景深平面的赛博朋克代码流，支持鼠标深度视差透视、点击电磁扰动冲击波与四套霓虹色系切换。",
+      "url": "web/matrix-rain/index.html",
+      "icon": "🟩"
+    },
+    {
+      "id": "quantum_core",
+      "type": "web",
+      "tag": "Web 3D 全息 · 原创",
+      "title": "3D 全息量子能量核心",
+      "desc": "三轴万向节戴森环与 1400 颗量子星尘环绕的等离子脉冲核心，支持鼠标 3D 悬浮视差与超频过载脉冲。",
+      "url": "web/quantum-core/index.html",
+      "icon": "💠"
+    },
+    {
+      "id": "black_hole",
+      "type": "web",
+      "tag": "WebGL 物理光线步进 · 原创",
+      "title": "黑洞引力透镜与吸积盘",
+      "desc": "基于广义相对论测地线光线步进 (Raymarching)，实时渲染事件视界、光子圈、相对论多普勒光变吸积盘与扭曲星空。",
+      "url": "web/black-hole/index.html",
+      "icon": "🕳️"
+    },
+    {
       "id": "webgl_fluid",
       "type": "web",
       "tag": "WebGL · 殿堂开源",
@@ -110,6 +137,26 @@
     }
   ],
   "python": [
+    {
+      "id": "galaxy_collision",
+      "type": "python",
+      "tag": "Python Tkinter · 原创",
+      "title": "60FPS 双星系引力碰撞模拟",
+      "desc": "1200+ 颗恒星受双超大质量黑洞引力摄动拉出壮丽潮汐尾与引力桥，支持鼠标点击生成临时引力奇点。",
+      "cmd": "python python/generative/galaxy_collision_tk.py",
+      "rel": "python/generative/galaxy_collision_tk.py",
+      "icon": "🌌"
+    },
+    {
+      "id": "lorenz_attractor_3d",
+      "type": "python",
+      "tag": "Python Turtle · 原创",
+      "title": "3D 洛伦兹奇异吸引子",
+      "desc": "基于三维投影与 Runge-Kutta 混沌方程实时绘制蝴蝶翅膀，支持鼠标任意拖拽三维视角与变色。",
+      "cmd": "python python/generative/lorenz_attractor_3d.py",
+      "rel": "python/generative/lorenz_attractor_3d.py",
+      "icon": "🦋"
+    },
     {
       "id": "neon_mandala",
       "type": "python",
