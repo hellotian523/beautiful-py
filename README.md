@@ -13,7 +13,7 @@
 
 ---
 
-## 📂 作品目录（共 26 个精选与原创展示）
+## 📂 作品目录（共 27 个精选与原创展示）
 
 
 ### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
@@ -56,6 +56,7 @@
 | **少女粉蝴蝶结圣诞树** | [`python/trees/pink_ribbon_tree.py`](python/trees/pink_ribbon_tree.py) | 粉色系波浪树冠搭配大小蝴蝶结与星星挂饰。 |
 | **动态分形樱花落花树** | [`python/trees/sakura_fractal_tree.py`](python/trees/sakura_fractal_tree.py) | 随机分形树干生长与珊瑚粉花瓣飘落。 |
 | **浪漫爱心叶片分形树** | [`python/trees/love_heart_tree.py`](python/trees/love_heart_tree.py) | 递归分形枝干末端绽放满树粉红爱心叶片。 |
+| **4D 超立方体四维投影翻转** | [`python/generative/tesseract_4d_turtle.py`](python/generative/tesseract_4d_turtle.py) | 16 顶点 32 边四维几何体，在 XW/YW/ZW 四维平面旋转并实时透视投影至 3D 与 2D，呈现内外交替折叠的高维视觉奇观。支持 3D 自由拖拽视角与多套霓虹色系。 |
 
 ---
 

@@ -256,6 +256,16 @@
       "cmd": "python python/trees/love_heart_tree.py",
       "rel": "python/trees/love_heart_tree.py",
       "icon": "🌳"
+    },
+    {
+      "id": "tesseract_4d",
+      "type": "python",
+      "tag": "Python Turtle · 原创",
+      "title": "4D 超立方体四维投影翻转",
+      "desc": "16 顶点 32 边四维几何体，在 XW/YW/ZW 四维平面旋转并实时透视投影至 3D 与 2D，呈现内外交替折叠的高维视觉奇观。支持 3D 自由拖拽视角与多套霓虹色系。",
+      "cmd": "python python/generative/tesseract_4d_turtle.py",
+      "rel": "python/generative/tesseract_4d_turtle.py",
+      "icon": "🧊"
     }
   ]
 }
