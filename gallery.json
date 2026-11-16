@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "prism_tunnel",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "万花筒棱镜穿梭隧道",
+      "desc": "零依赖 Canvas 几何光环叠成纵深万花筒隧道，支持鼠标偏转视差、点击切换色谱与空格暂停。",
+      "url": "web/prism-tunnel/index.html",
+      "icon": "🔷"
+    },
+    {
       "id": "matrix_rain",
       "type": "web",
       "tag": "Web 3D 视差 · 原创",

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>万花筒棱镜穿梭隧道</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #02030c; font-family: system-ui, "Microsoft YaHei", sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .hint { position: fixed; left: 24px; top: 20px; padding: 8px 13px; border: 1px solid #8b5cf688; border-radius: 999px; color: #e9d5ff; background: #09051caa; backdrop-filter: blur(9px); font-size: 13px; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <canvas id="tunnel"></canvas>
+  <div class="hint">✦ 移动鼠标偏转万花筒 · 点击切换色谱 · 空格暂停</div>
+  <script>
+    const canvas = document.querySelector("#tunnel");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas 2D is unavailable");
+
+    let width, height, scale, hue = 270, paused = false;
+    const pointer = { x: 0, y: 0 };
+    function resize() {
+      scale = Math.min(devicePixelRatio || 1, 2);
+      width = innerWidth; height = innerHeight;
+      canvas.width = width * scale; canvas.height = height * scale;
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      pointer.x = width / 2; pointer.y = height / 2;
+    }
+    addEventListener("resize", resize); resize();
+    addEventListener("pointermove", e => { pointer.x = e.clientX; pointer.y = e.clientY; });
+    addEventListener("pointerdown", () => { hue = (hue + 71) % 360; });
+    addEventListener("keydown", e => { if (e.code === "Space") { paused = !paused; e.preventDefault(); } });
+
+    function polygon(cx, cy, radius, sides, rotation) {
+      ctx.beginPath();
+      for (let i = 0; i <= sides; i++) {
+        const a = rotation + i * Math.PI * 2 / sides;
+        const x = cx + Math.cos(a) * radius, y = cy + Math.sin(a) * radius;
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+    }
+
+    let start = performance.now();
+    function frame(now) {
+      requestAnimationFrame(frame);
+      if (paused) return;
+      const t = (now - start) * 0.001;
+      const cx = width / 2 + (pointer.x - width / 2) * 0.16;
+      const cy = height / 2 + (pointer.y - height / 2) * 0.16;
+      const max = Math.hypot(width, height) * 0.8;
+      ctx.fillStyle = "rgba(2,3,12,.23)"; ctx.fillRect(0, 0, width, height);
+      ctx.save(); ctx.globalCompositeOperation = "lighter";
+      for (let layer = 24; layer >= 0; layer--) {
+        const z = (layer / 25 + t * 0.18) % 1;
+        const radius = 14 + z * max;
+        const alpha = Math.pow(1 - z, 1.7) * .66;
+        const sides = 6 + (layer % 3) * 2;
+        const angle = t * (layer % 2 ? -.38 : .28) + z * 4;
+        ctx.lineWidth = 1 + (1 - z) * 2.5;
+        ctx.strokeStyle = `hsla(${(hue + layer * 11 + z * 110) % 360},100%,68%,${alpha})`;
+        ctx.shadowBlur = 18; ctx.shadowColor = ctx.strokeStyle;
+        polygon(cx, cy, radius, sides, angle); ctx.stroke();
+        if (layer % 3 === 0) {
+          ctx.fillStyle = `hsla(${(hue + 145 + layer * 9) % 360},100%,70%,${alpha * .08})`;
+          ctx.fill();
+        }
+      }
+      ctx.shadowBlur = 0;
+      for (let ray = 0; ray < 18; ray++) {
+        const a = ray * Math.PI * 2 / 18 + t * .12;
+        const length = max * (.34 + .2 * Math.sin(t + ray));
+        const gradient = ctx.createLinearGradient(cx, cy, cx + Math.cos(a) * length, cy + Math.sin(a) * length);
+        gradient.addColorStop(0, `hsla(${hue},100%,80%,.36)`); gradient.addColorStop(1, "transparent");
+        ctx.strokeStyle = gradient; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * length, cy + Math.sin(a) * length); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

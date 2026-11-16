@@ -13,7 +13,7 @@
 
 ---
 
-## 📂 作品目录（共 27 个精选与原创展示）
+## 📂 作品目录（共 28 个精选与原创展示）
 
 
 ### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
@@ -26,6 +26,7 @@
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点 / 原作者说明 |
 | :--- | :--- | :--- |
+| **万花筒棱镜穿梭隧道** | [`web/prism-tunnel/index.html`](web/prism-tunnel/index.html) | 零依赖 Canvas 几何光环叠成纵深万花筒隧道，支持鼠标偏转视差、点击切换色谱与空格暂停。 |
 | **3D 赛博矩阵数字雨** | [`web/matrix-rain/index.html`](web/matrix-rain/index.html) | 多景深平面的赛博朋克代码流，支持鼠标深度视差透视、点击电磁扰动冲击波与四套霓虹色系切换。 |
 | **3D 全息量子能量核心** | [`web/quantum-core/index.html`](web/quantum-core/index.html) | 三轴万向节戴森环与 1400 颗量子星尘环绕的等离子脉冲核心，支持鼠标 3D 悬浮视差与超频过载脉冲。 |
 | **黑洞引力透镜与吸积盘** | [`web/black-hole/index.html`](web/black-hole/index.html) | 基于广义相对论测地线光线步进 (Raymarching)，实时渲染事件视界、光子圈、相对论多普勒光变吸积盘与扭曲星空。 |
