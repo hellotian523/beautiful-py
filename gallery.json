@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "wave_interference",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "潮汐干涉纹",
+      "desc": "三组同心波叠成青蓝与金色的干涉花纹，拖动水面可移动波源。",
+      "url": "web/wave-interference/index.html",
+      "icon": "🌊"
+    },
+    {
       "id": "prism_tunnel",
       "type": "web",
       "tag": "Web Canvas · 原创",

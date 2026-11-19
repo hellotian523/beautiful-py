@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>潮汐干涉纹</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #080b19; color: #fff8e9; font: 16px system-ui, sans-serif; }
+    main { display: grid; place-items: center; min-height: 100svh; padding: 1rem; }
+    canvas { display: block; width: min(100%, 76svh, 48rem); aspect-ratio: 1; touch-action: none; cursor: crosshair; }
+    header { position: fixed; top: 1rem; left: 1rem; padding: .75rem 1rem; background: #080b19e8; border-radius: .75rem; }
+    h1 { margin: 0; font-size: 1.25rem; }
+    p { margin: .5rem 0; }
+    button { font: inherit; color: inherit; background: #25354b; border: 1px solid #7790a7; border-radius: .4rem; padding: .4rem .75rem; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <canvas width="360" height="360" role="img" aria-label="青蓝与金色的同心波纹相互交叠"></canvas>
+  </main>
+  <header>
+    <h1>潮汐干涉纹</h1>
+    <p>拖动水面，移动第三个波源。</p>
+    <button type="button">暂停</button>
+  </header>
+  <script>
+    const canvas = document.querySelector('canvas');
+    const button = document.querySelector('button');
+    const ctx = canvas.getContext('2d');
+    const size = canvas.width;
+    const frame = ctx.createImageData(size, size);
+    const phase = new Float32Array(size * size);
+    const fixed = new Float32Array(size * size);
+    let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let time = 0;
+    let last = null;
+    let animation;
+
+    function moveSource(x, y) {
+      for (let i = 0; i < phase.length; i++) {
+        phase[i] = Math.hypot(i % size - x, Math.floor(i / size) - y) * .21;
+      }
+    }
+
+    moveSource(size * .5, size * .69);
+    for (let i = 0; i < fixed.length; i++) {
+      const x = i % size;
+      const y = Math.floor(i / size);
+      fixed[i] = Math.hypot(x - size * .32, y - size * .39) * .21;
+    }
+
+    function draw() {
+      const data = frame.data;
+      for (let i = 0; i < phase.length; i++) {
+        const x = i % size;
+        const y = Math.floor(i / size);
+        const a = Math.cos(fixed[i] - time);
+        const b = Math.cos(fixed[y * size + size - 1 - x] - time);
+        const c = Math.cos(phase[i] - time + 1.1);
+        const wave = (a + b + c) / 3;
+        const crest = Math.max(0, wave) ** 3;
+        const trough = Math.max(0, -wave) ** 2;
+        const fade = Math.max(0, 1 - Math.hypot(x / size - .5, y / size - .5) * 1.45);
+        data[4 * i] = 8 + fade * (265 * crest + 20 * trough);
+        data[4 * i + 1] = 11 + fade * (175 * crest + 183 * trough);
+        data[4 * i + 2] = 25 + fade * (70 * crest + 216 * trough);
+        data[4 * i + 3] = 255;
+      }
+      ctx.putImageData(frame, 0, 0);
+    }
+
+    function tick(now) {
+      if (last === null || now - last >= 30) {
+        if (last !== null) time += Math.min(now - last, 65) * .004;
+        last = now;
+        draw();
+      }
+      animation = requestAnimationFrame(tick);
+    }
+
+    function updatePlayback() {
+      button.textContent = paused ? '播放' : '暂停';
+      if (paused) cancelAnimationFrame(animation);
+      else {
+        last = null;
+        animation = requestAnimationFrame(tick);
+      }
+    }
+
+    function aim(event) {
+      const rect = canvas.getBoundingClientRect();
+      moveSource((event.clientX - rect.left) / rect.width * size,
+                 (event.clientY - rect.top) / rect.height * size);
+      if (paused) draw();
+    }
+
+    canvas.addEventListener('pointerdown', event => {
+      canvas.setPointerCapture(event.pointerId);
+      aim(event);
+    });
+    canvas.addEventListener('pointermove', event => {
+      if (canvas.hasPointerCapture(event.pointerId)) aim(event);
+    });
+    button.addEventListener('click', () => {
+      paused = !paused;
+      updatePlayback();
+    });
+    draw();
+    updatePlayback();
+  </script>
+</body>
+</html>
