@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>谐振光织</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #050814; color: #e9f4ff; font: 16px system-ui, sans-serif; }
+    main { min-height: 100svh; display: grid; place-items: center; padding: 7rem 1rem 1rem; }
+    canvas { width: min(100%, 76svh, 50rem); aspect-ratio: 1; display: block; }
+    header { position: absolute; top: 1rem; left: 1rem; right: 1rem; }
+    h1 { font-size: 1.3rem; margin: 0; }
+    p { margin: .5rem 0; color: #aebdd5; }
+    button { font: inherit; color: inherit; background: #17243d; border: 1px solid #718bb0; border-radius: .4rem; padding: .4rem .8rem; cursor: pointer; }
+    button:focus-visible { outline: 3px solid #ffd68e; outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <!-- Original artwork for beautiful-py; distributed under the repository license. -->
+  <header>
+    <h1>谐振光织</h1>
+    <p>四组衰减摆线织出流动的光丝。</p>
+    <button id="play" type="button">暂停</button>
+    <button id="palette" type="button">切换色谱</button>
+  </header>
+  <main><canvas width="900" height="900" role="img" aria-label="青蓝、紫红和金色的谐振摆线交织成旋转光茧"></canvas></main>
+  <script>
+    const canvas = document.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    const play = document.querySelector('#play');
+    let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let phase = 0;
+    let palette = 0;
+    let last = null;
+    let animation;
+
+    function point(t, layer) {
+      const decay = Math.exp(-t * .017);
+      const twist = phase * .16 + layer * .09;
+      const x = (Math.sin(t * 2.01 + phase + layer * .035) + .38 * Math.sin(t * 3.02)) * decay;
+      const y = (Math.sin(t * 3 + .8) + .38 * Math.sin(t * 2.02 + phase)) * decay;
+      return [450 + (x * Math.cos(twist) - y * Math.sin(twist)) * 265,
+              450 + (x * Math.sin(twist) + y * Math.cos(twist)) * 265];
+    }
+
+    function draw() {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = '#050814';
+      ctx.fillRect(0, 0, 900, 900);
+      ctx.globalCompositeOperation = 'lighter';
+      for (let layer = 0; layer < 4; layer++) {
+        for (let segment = 0; segment < 72; segment++) {
+          ctx.beginPath();
+          for (let step = 0; step <= 24; step++) {
+            const t = (segment * 24 + step) * .022;
+            const [x, y] = point(t, layer);
+            if (step === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          const hue = (palette * 100 + 185 + segment * 2.3 + layer * 25) % 360;
+          ctx.strokeStyle = `hsla(${hue}, 90%, 68%, .36)`;
+          ctx.lineWidth = 1.15;
+          ctx.stroke();
+        }
+      }
+    }
+
+    function tick(now) {
+      if (last === null || now - last >= 32) {
+        if (last !== null) phase += Math.min(now - last, 80) * .00023;
+        last = now;
+        draw();
+      }
+      animation = requestAnimationFrame(tick);
+    }
+
+    function playback() {
+      play.textContent = paused ? '播放' : '暂停';
+      cancelAnimationFrame(animation);
+      if (!paused) { last = null; animation = requestAnimationFrame(tick); }
+    }
+    play.addEventListener('click', () => { paused = !paused; playback(); });
+    document.querySelector('#palette').addEventListener('click', () => { palette = (palette + 1) % 3; draw(); });
+    draw();
+    playback();
+  </script>
+</body>
+</html>
