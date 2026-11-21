@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "magnetic_bloom",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "磁场光谱",
+      "desc": "三维磁偶极场线交织成青金色空间之花，流光沿双极弧线穿行，支持暂停并适配减少动态效果偏好。",
+      "url": "web/magnetic-bloom/index.html",
+      "icon": "🧲"
+    },
+    {
       "id": "harmonic_weave",
       "type": "web",
       "tag": "Web Canvas · 原创",

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>磁场光谱</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#030711;color:#e4f5ff;font:16px system-ui,sans-serif}header{padding:1.2rem 1.4rem}h1{font-size:1.4rem;margin:0}p{color:#a8bdd0;margin:.5rem 0}button{font:inherit;color:inherit;background:#13283b;border:1px solid #7298ac;border-radius:6px;padding:.4rem .9rem;cursor:pointer}button:focus-visible{outline:3px solid #ffe0a0;outline-offset:3px}canvas{display:block;width:min(100%,76svh,850px);aspect-ratio:1;margin:auto}
+</style>
+<!-- Original artwork for beautiful-py; distributed under the repository license.
+     Dipole-inspired geometry, an artistic visualization rather than a field solver. -->
+<header><h1>磁场光谱</h1><p>双极之间，流光沿磁力线开成一朵空间之花。</p><button id="play" type="button">暂停</button></header>
+<canvas width="900" height="900" role="img" aria-label="青色与金色的磁偶极场线环绕双极，光点沿弧线流动"></canvas>
+<script>
+const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),play=document.querySelector('#play');
+let paused=matchMedia('(prefers-reduced-motion: reduce)').matches,phase=0,last=null,animation;
+function point(theta,azimuth,radius){
+  const r=radius*Math.sin(theta)**2;
+  const x=r*Math.sin(theta)*Math.cos(azimuth),y=r*Math.cos(theta),z=r*Math.sin(theta)*Math.sin(azimuth);
+  const a=phase*.12+.4,c=Math.cos(a),s=Math.sin(a);
+  const rx=x*c+z*s,rz=z*c-x*s,tilt=.4;
+  const ry=y*Math.cos(tilt)-rz*Math.sin(tilt),depth=y*Math.sin(tilt)+rz*Math.cos(tilt);
+  const scale=720/(720+depth);
+  return [450+rx*scale,450+ry*scale,scale];
+}
+function draw(){
+  ctx.globalCompositeOperation='source-over';ctx.fillStyle='#030711';ctx.fillRect(0,0,900,900);
+  const halo=ctx.createRadialGradient(450,450,4,450,450,380);
+  halo.addColorStop(0,'#12304b');halo.addColorStop(1,'#030711');ctx.fillStyle=halo;ctx.fillRect(0,0,900,900);
+  ctx.globalCompositeOperation='lighter';
+  for(let ring=0;ring<3;ring++)for(let meridian=0;meridian<20;meridian++){
+    const azimuth=meridian*Math.PI/10,radius=190+ring*62;
+    ctx.beginPath();
+    for(let step=0;step<=100;step++){
+      const p=point(.13+(Math.PI-.26)*step/100,azimuth,radius);
+      if(step===0)ctx.moveTo(p[0],p[1]);else ctx.lineTo(p[0],p[1]);
+    }
+    ctx.strokeStyle=`hsla(${175+ring*20},85%,65%,.17)`;ctx.lineWidth=.9;ctx.stroke();
+    for(let spark=0;spark<3;spark++){
+      const travel=(phase*.13+spark/3+meridian*.037+ring*.11)%1;
+      for(let tail=0;tail<9;tail++){
+        const t=(travel-tail*.005+1)%1,p=point(.13+t*(Math.PI-.26),azimuth,radius);
+        ctx.fillStyle=`hsla(${t<.5?185:40},95%,75%,${(1-tail/9)*.8})`;
+        ctx.beginPath();ctx.arc(p[0],p[1],(tail===0?1.7:1)*p[2],0,Math.PI*2);ctx.fill();
+      }
+    }
+  }
+  for(const sign of [-1,1]){
+    const p=point(sign<0?Math.PI:0,0,300),y=p[1]+sign*27;
+    const glow=ctx.createRadialGradient(450,y,0,450,y,24);
+    glow.addColorStop(0,sign<0?'#ffdda0':'#a4f9ff');glow.addColorStop(1,'transparent');
+    ctx.fillStyle=glow;ctx.fillRect(426,y-24,48,48);
+  }
+}
+function tick(now){
+  if(last===null||now-last>=32){if(last!==null)phase+=Math.min(now-last,80)*.001;last=now;draw();}
+  animation=requestAnimationFrame(tick);
+}
+function playback(){play.textContent=paused?'播放':'暂停';play.setAttribute('aria-pressed',String(paused));cancelAnimationFrame(animation);if(!paused){last=null;animation=requestAnimationFrame(tick);}}
+play.addEventListener('click',()=>{paused=!paused;playback();});
+draw();playback();
+</script>
+</html>

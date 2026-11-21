@@ -13,7 +13,7 @@
 
 ---
 
-## 📂 作品目录（共 30 个精选与原创展示）
+## 📂 作品目录（共 31 个精选与原创展示）
 
 
 ### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
@@ -26,6 +26,7 @@
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点 / 原作者说明 |
 | :--- | :--- | :--- |
+| **磁场光谱** | [`web/magnetic-bloom/index.html`](web/magnetic-bloom/index.html) | 三维磁偶极场线交织成青金色空间之花，流光沿双极弧线穿行，支持暂停并适配减少动态效果偏好。 |
 | **谐振光织** | [`web/harmonic-weave/index.html`](web/harmonic-weave/index.html) | 四组衰减摆线交织成旋转光茧，青蓝、紫红与金色光丝随谐振流动，支持暂停与三套色谱切换。 |
 | **潮汐干涉纹** | [`web/wave-interference/index.html`](web/wave-interference/index.html) | 三组同心波叠成青蓝与金色的干涉花纹，拖动水面可移动波源。 |
 | **万花筒棱镜穿梭隧道** | [`web/prism-tunnel/index.html`](web/prism-tunnel/index.html) | 零依赖 Canvas 几何光环叠成纵深万花筒隧道，支持鼠标偏转视差、点击切换色谱与空格暂停。 |
