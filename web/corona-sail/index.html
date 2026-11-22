@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>日冕光帆</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#030711;color:#e4f5ff;font:16px system-ui,sans-serif}header{padding:1.2rem 1.4rem}h1{font-size:1.4rem;margin:0}p{color:#a8bdd0;margin:.5rem 0}button{font:inherit;color:inherit;background:#13283b;border:1px solid #7298ac;border-radius:6px;padding:.4rem .9rem;cursor:pointer}button:focus-visible{outline:3px solid #ffe0a0;outline-offset:3px}canvas{display:block;width:min(100%,76svh,850px);aspect-ratio:1;margin:auto}
+</style>
+<!-- Original artwork for beautiful-py; distributed under the repository license.
+     Original polar surface sculpture; an artistic visualization. -->
+<header><h1>日冕光帆</h1><p>七瓣褶皱在金色经纬间呼吸，像一面绕恒星航行的光帆。</p><button id="play" type="button">暂停</button></header>
+<canvas width="900" height="900" role="img" aria-label="金色与青绿经纬线织成旋转的七瓣立体日冕"></canvas>
+<script>
+const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),play=document.querySelector('#play');
+let paused=matchMedia('(prefers-reduced-motion: reduce)').matches,phase=0,last=null;
+function point(u,v){
+ const r=235*(1+.24*Math.cos(7*u+phase*.6)*Math.sin(v)**2);
+ const x=r*Math.sin(v)*Math.cos(u),y=r*Math.cos(v),z=r*Math.sin(v)*Math.sin(u);
+ const a=phase*.18,c=Math.cos(a),s=Math.sin(a),rx=x*c+z*s,rz=z*c-x*s;
+ const yy=y*.85-rz*.53,depth=y*.53+rz*.85,k=760/(760+depth);
+ return [450+rx*k,450+yy*k,k];
+}
+function draw(){
+ ctx.globalCompositeOperation='source-over';ctx.fillStyle='#030711';ctx.fillRect(0,0,900,900);
+ const glow=ctx.createRadialGradient(450,450,20,450,450,400);glow.addColorStop(0,'#301528');glow.addColorStop(1,'#030711');ctx.fillStyle=glow;ctx.fillRect(0,0,900,900);
+ ctx.globalCompositeOperation='lighter';
+ for(let j=1;j<65;j++){
+  const v=j*Math.PI/65;ctx.beginPath();
+  for(let i=0;i<=240;i++){const p=point(i*Math.PI/120,v);if(i===0)ctx.moveTo(p[0],p[1]);else ctx.lineTo(p[0],p[1]);}
+  ctx.strokeStyle=`hsla(${18+j*2.1},95%,65%,.48)`;ctx.lineWidth=1.1;ctx.stroke();
+ }
+ for(let j=0;j<42;j++){
+  ctx.beginPath();for(let i=0;i<=100;i++){const p=point(j*Math.PI/21,i*Math.PI/100);if(i===0)ctx.moveTo(p[0],p[1]);else ctx.lineTo(p[0],p[1]);}
+  ctx.strokeStyle='rgba(255,190,110,.17)';ctx.stroke();
+ }
+}
+function frame(now){if(last!==null&&!paused)phase+=Math.min((now-last)/1000,.05);last=now;if(!paused)draw();requestAnimationFrame(frame);}
+function label(){play.textContent=paused?'继续':'暂停';play.setAttribute('aria-pressed',String(paused));}
+play.addEventListener('click',()=>{paused=!paused;label();});
+label();draw();requestAnimationFrame(frame);
+</script>
+</html>

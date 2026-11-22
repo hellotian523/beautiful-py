@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "corona_sail",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "日冕光帆",
+      "desc": "七瓣极坐标曲面由金色与青绿经纬线织成，随旋转舒展呼吸；零依赖，支持暂停及减少动态效果偏好。",
+      "url": "web/corona-sail/index.html",
+      "icon": "☀️"
+    },
+    {
       "id": "magnetic_bloom",
       "type": "web",
       "tag": "Web Canvas · 原创",
