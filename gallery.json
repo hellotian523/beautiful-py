@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "pendulum_wave",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "摆波星阵",
+      "desc": "二十四颗青金光摆以不同周期交错成波，六十秒后重新同步；零依赖，支持暂停与减少动态效果偏好。",
+      "url": "web/pendulum-wave/index.html",
+      "icon": "📿"
+    },
+    {
       "id": "corona_sail",
       "type": "web",
       "tag": "Web Canvas · 原创",
