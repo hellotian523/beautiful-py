@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>金角花盘</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070a16; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #b9c9dc; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #162941; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>金角花盘</h1>
+  <p>金角排列的种子由内向外发光，织出向日葵般的双向螺旋。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="金角排列的种子由内向外发光，织出向日葵般的双向螺旋。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+const background = ctx.createRadialGradient(450, 450, 30, 450, 450, 450);
+background.addColorStop(0, '#191e38');
+background.addColorStop(1, '#070a16');
+
+
+function draw() {
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  // The golden angle spaces consecutive seeds without forming radial rows.
+  for (let i = 0; i < 820; i++) {
+    const radius = 12.6 * Math.sqrt(i);
+    const angle = i * Math.PI * (3 - Math.sqrt(5)) + time * .15;
+    const light = (.5 + .5 * Math.cos(radius * .046 - time * 2)) ** 5;
+    const x = 450 + Math.cos(angle) * radius;
+    const y = 450 + Math.sin(angle) * radius;
+    ctx.fillStyle = `hsl(${32 + 135 * i / 820} 84% ${35 + light * 52}%)`;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 3 + light * 4, 2 + light * 3, angle + 1, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  if (!paused) request = requestAnimationFrame(frame);
+}
+let request;
+button.addEventListener('click', () => {
+  paused = !paused;
+  button.textContent = paused ? '继续动画' : '暂停动画';
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+button.textContent = paused ? '继续动画' : '暂停动画';
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "golden_bloom",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "金角花盘",
+      "desc": "金角排列的种子由内向外发光，织出向日葵般的双向螺旋。",
+      "url": "web/golden-bloom/index.html",
+      "icon": "🌻"
+    },
+    {
       "id": "torus_knot",
       "type": "web",
       "tag": "Web Canvas · 原创",
