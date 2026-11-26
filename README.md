@@ -13,7 +13,7 @@
 
 ---
 
-## 📂 作品目录（共 33 个精选与原创展示）
+## 📂 作品目录（共 34 个精选与原创展示）
 
 
 ### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
@@ -26,6 +26,7 @@
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点 / 原作者说明 |
 | :--- | :--- | :--- |
+| **玫瑰弦窗** | [`web/rose-chords/index.html`](web/rose-chords/index.html) | 七瓣极坐标边界上的彩色弦线交织成旋转花窗；零依赖，支持暂停与减少动态效果偏好。 |
 | **摆波星阵** | [`web/pendulum-wave/index.html`](web/pendulum-wave/index.html) | 二十四颗青金光摆以不同周期交错成波，六十秒后重新同步；零依赖，支持暂停与减少动态效果偏好。 |
 | **日冕光帆** | [`web/corona-sail/index.html`](web/corona-sail/index.html) | 七瓣极坐标曲面由金色与青绿经纬线织成，随旋转舒展呼吸；零依赖，支持暂停及减少动态效果偏好。 |
 | **磁场光谱** | [`web/magnetic-bloom/index.html`](web/magnetic-bloom/index.html) | 三维磁偶极场线交织成青金色空间之花，流光沿双极弧线穿行，支持暂停并适配减少动态效果偏好。 |

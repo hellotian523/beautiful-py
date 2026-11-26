@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "rose_chords",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "玫瑰弦窗",
+      "desc": "七瓣极坐标边界上的彩色弦线交织成旋转花窗；零依赖，支持暂停与减少动态效果偏好。",
+      "url": "web/rose-chords/index.html",
+      "icon": "🌹"
+    },
+    {
       "id": "pendulum_wave",
       "type": "web",
       "tag": "Web Canvas · 原创",

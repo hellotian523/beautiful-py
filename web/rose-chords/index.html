@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>玫瑰弦窗</title>
+<style>body{margin:0;background:#060914;color:#e5dcff;font:16px system-ui}canvas{display:block;width:100vw;height:100vh}header{position:fixed;top:24px;left:24px}h1{font-size:24px;margin:0}p{color:#b5b2cb}button,a{color:inherit;background:#18172c;border:1px solid #777194;border-radius:8px;padding:8px 16px}a{display:inline-block;text-decoration:none}button{cursor:pointer}</style>
+<canvas aria-label="彩色弦线交织的旋转玫瑰花窗"></canvas><header><h1>玫瑰弦窗</h1><p>ROSE CHORDS · 原创几何光绘</p><button type="button" aria-pressed="false">暂停</button> <a href="../../index.html">返回展厅</a></header>
+<script>
+'use strict';
+const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),button=document.querySelector('button');
+const motion=matchMedia('(prefers-reduced-motion: reduce)');
+let paused=motion.matches,time=0,last=0,w=0,h=0;
+function sync(){button.textContent=paused?'播放':'暂停';button.setAttribute('aria-pressed',String(paused));}
+button.onclick=()=>{paused=!paused;sync();};
+motion.addEventListener('change',e=>{paused=e.matches;sync();});
+function resize(){w=innerWidth;h=innerHeight;const d=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(w*d);canvas.height=Math.round(h*d);ctx.setTransform(d,0,0,d,0,0);draw();}
+function point(a,r){const radius=r*(.78+.22*Math.cos(7*a+time*.16));return [w/2+radius*Math.cos(a),h*.55+radius*Math.sin(a)];}
+function draw(){ctx.fillStyle='#060914';ctx.fillRect(0,0,w,h);const r=Math.min(w*.44,h*.36);ctx.globalCompositeOperation='lighter';
+for(let layer=0;layer<3;layer++){for(let i=0;i<252;i++){const a=i*Math.PI*2/252+time*.035,b=a+Math.PI*(.68+layer*.18)+.22*Math.sin(3*a+time*.23);const p=point(a,r),q=point(b,r);ctx.strokeStyle=`hsla(${i*360/252+layer*60+time*8},85%,65%,.19)`;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...q);ctx.stroke();}}
+ctx.globalCompositeOperation='source-over';}
+function frame(now){if(last&&!paused)time+=Math.min((now-last)/1000,.05);last=now;if(!paused)draw();requestAnimationFrame(frame);}
+addEventListener('resize',resize);sync();resize();requestAnimationFrame(frame);
+</script></html>
