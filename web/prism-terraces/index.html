@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>棱晶阶原</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070a16; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #b9c9dc; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #162941; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>棱晶阶原</h1>
+  <p>等轴测晶柱组成悬浮岛屿，脉冲由中心推向边缘，折出粉紫和冰蓝色阶。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="等轴测晶柱组成悬浮岛屿，脉冲由中心推向边缘，折出粉紫和冰蓝色阶。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+const background = ctx.createRadialGradient(450, 450, 30, 450, 450, 450);
+background.addColorStop(0, '#191e38');
+background.addColorStop(1, '#070a16');
+
+
+function draw() {
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  const project = (x, y, z) => [450 + (x - y) * 30, 480 + (x + y) * 15 - z];
+  function face(points, fill) {
+    ctx.beginPath();
+    for (const point of points) ctx.lineTo(...point);
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.strokeStyle = '#0d122a';
+    ctx.stroke();
+  }
+  for (let x = -6; x <= 6; x++) {
+    for (let y = -6; y <= 6; y++) {
+      const distance = Math.hypot(x, y);
+      if (distance > 6.4) continue;
+      const pulse = .5 + .5 * Math.cos(distance * 1.15 - time * 2);
+      const height = 16 + pulse * (134 - distance * 12);
+      const hue = 200 + pulse * 105;
+      const a = project(x, y, height), b = project(x + .89, y, height);
+      const c = project(x + .89, y + .89, height), d = project(x, y + .89, height);
+      const base = project(x + .89, y + .89, 0);
+      face([b, c, base, project(x + .89, y, 0)], `hsl(${hue} 53% 31%)`);
+      face([d, c, base, project(x, y + .89, 0)], `hsl(${hue} 62% 44%)`);
+      face([a, b, c, d], `hsl(${hue} 75% ${53 + pulse * 28}%)`);
+    }
+  }
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  if (!paused) request = requestAnimationFrame(frame);
+}
+let request;
+button.addEventListener('click', () => {
+  paused = !paused;
+  button.textContent = paused ? '继续动画' : '暂停动画';
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+button.textContent = paused ? '继续动画' : '暂停动画';
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

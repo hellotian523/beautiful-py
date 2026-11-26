@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "prism_terraces",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "棱晶阶原",
+      "desc": "等轴测晶柱组成悬浮岛屿，脉冲由中心推向边缘，折出粉紫和冰蓝色阶。",
+      "url": "web/prism-terraces/index.html",
+      "icon": "🔶"
+    },
+    {
       "id": "golden_bloom",
       "type": "web",
       "tag": "Web Canvas · 原创",
