@@ -13,7 +13,7 @@
 
 ---
 
-## 📂 作品目录（共 37 个精选与原创展示）
+## 📂 作品目录（共 38 个精选与原创展示）
 
 
 ### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
@@ -26,6 +26,7 @@
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点 / 原作者说明 |
 | :--- | :--- | :--- |
+| **闪电三角洲** | [`web/lightning-delta/index.html`](web/lightning-delta/index.html) | 蓝紫色电流沿分形树枝由中心向外传播，像夜色中亮起的河流三角洲。 |
 | **棱晶阶原** | [`web/prism-terraces/index.html`](web/prism-terraces/index.html) | 等轴测晶柱组成悬浮岛屿，脉冲由中心推向边缘，折出粉紫和冰蓝色阶。 |
 | **金角花盘** | [`web/golden-bloom/index.html`](web/golden-bloom/index.html) | 金角排列的种子由内向外发光，织出向日葵般的双向螺旋。 |
 | **环面流光** | [`web/torus-knot/index.html`](web/torus-knot/index.html) | 青金粒子沿三绕两回的三维环面纽结追逐，随空间旋转展现交错结构；零依赖，支持暂停与减少动态效果偏好。 |

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>闪电三角洲</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070a16; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #b9c9dc; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #162941; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>闪电三角洲</h1>
+  <p>蓝紫色电流沿分形树枝由中心向外传播，像夜色中亮起的河流三角洲。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="蓝紫色电流沿分形树枝由中心向外传播，像夜色中亮起的河流三角洲。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+const background = ctx.createRadialGradient(450, 450, 30, 450, 450, 450);
+background.addColorStop(0, '#191e38');
+background.addColorStop(1, '#070a16');
+const branches = [];
+function grow(x, y, angle, length, level, seed) {
+  const endX = x + Math.cos(angle) * length;
+  const endY = y + Math.sin(angle) * length;
+  branches.push({x, y, endX, endY, level});
+  if (level === 5) return;
+  const bend = Math.sin(seed * 7.13) * .25;
+  grow(endX, endY, angle - .46 + bend, length * .69, level + 1, seed * 2);
+  grow(endX, endY, angle + .49 + bend, length * .72, level + 1, seed * 2 + 1);
+}
+for (let i = 0; i < 7; i++) grow(450, 450, i * Math.PI * 2 / 7, 127, 0, i + 1);
+
+function draw() {
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  ctx.globalCompositeOperation = 'lighter';
+  for (const {x, y, endX, endY, level} of branches) {
+    const progress = (time * 1.9) % 8;
+    const pulse = Math.exp(-((level - progress + .15) ** 2) * 1.4);
+    const hue = 188 + level * 12;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(endX, endY);
+    ctx.lineWidth = 9 - level;
+    ctx.strokeStyle = `hsla(${hue}, 90%, 58%, ${.08 + pulse * .36})`;
+    ctx.stroke();
+    ctx.lineWidth = 2.4 - level * .28;
+    ctx.strokeStyle = `hsla(${hue}, 95%, 77%, ${.43 + pulse * .55})`;
+    ctx.stroke();
+  }
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  if (!paused) request = requestAnimationFrame(frame);
+}
+let request;
+button.addEventListener('click', () => {
+  paused = !paused;
+  button.textContent = paused ? '继续动画' : '暂停动画';
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+button.textContent = paused ? '继续动画' : '暂停动画';
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

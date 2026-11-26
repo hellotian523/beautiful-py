@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "lightning_delta",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "闪电三角洲",
+      "desc": "蓝紫色电流沿分形树枝由中心向外传播，像夜色中亮起的河流三角洲。",
+      "url": "web/lightning-delta/index.html",
+      "icon": "⚡"
+    },
+    {
       "id": "prism_terraces",
       "type": "web",
       "tag": "Web Canvas · 原创",
