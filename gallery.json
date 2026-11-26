@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "torus_knot",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "环面流光",
+      "desc": "青金粒子沿三绕两回的三维环面纽结追逐，随空间旋转展现交错结构；零依赖，支持暂停与减少动态效果偏好。",
+      "url": "web/torus-knot/index.html",
+      "icon": "🪢"
+    },
+    {
       "id": "rose_chords",
       "type": "web",
       "tag": "Web Canvas · 原创",
