@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "mobius_ribbon",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "莫比乌斯织带",
+      "desc": "一条半扭转的彩带在空间里翻转，条纹沿单侧曲面流动。",
+      "url": "web/mobius-ribbon/index.html",
+      "icon": "🎗️"
+    },
+    {
       "id": "voronoi_glass",
       "type": "web",
       "tag": "Web Canvas · 原创",

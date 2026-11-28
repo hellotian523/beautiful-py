@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>莫比乌斯织带</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070a16; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #b9c9dc; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #162941; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>莫比乌斯织带</h1>
+  <p>一条半扭转的彩带在空间里翻转，条纹沿单侧曲面流动。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="一条半扭转的彩带在空间里翻转，条纹沿单侧曲面流动。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+let request;
+const background = ctx.createRadialGradient(450, 450, 40, 450, 450, 457);
+background.addColorStop(0, '#181d36');
+background.addColorStop(1, '#070a16');
+
+function project(angle, width) {
+  const radius = 241 + width * Math.cos(angle / 2);
+  const x = radius * Math.cos(angle), y = radius * Math.sin(angle);
+  const z = width * Math.sin(angle / 2);
+  const tilt = .67 + .26 * Math.sin(time * .8);
+  const depth = y * Math.sin(tilt) + z * Math.cos(tilt);
+  const scale = 950 / (950 + depth);
+  return [450 + x * scale, 450 + (y * Math.cos(tilt) - z * Math.sin(tilt)) * scale, depth];
+}
+
+function draw() {
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  const panels = [];
+  for (let i = 0; i < 144; i++) {
+    const a = i * Math.PI / 72, b = (i + 1) * Math.PI / 72;
+    const vertices = [project(a, -75), project(b, -75), project(b, 75), project(a, 75)];
+    const depth = vertices.reduce((sum, point) => sum + point[2], 0);
+    panels.push({ vertices, depth, angle: a });
+  }
+  panels.sort((a, b) => b.depth - a.depth);
+  for (const { vertices, angle, depth } of panels) {
+    const light = 48 + 24 * Math.cos(angle * 12 - time * 3) - depth * .012;
+    ctx.beginPath();
+    for (const [x, y] of vertices) ctx.lineTo(x, y);
+    ctx.closePath();
+    ctx.fillStyle = `hsl(${210 + 90 * Math.sin(angle - time * .35)} 86% ${light}%)`;
+    ctx.strokeStyle = ctx.fillStyle;
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  request = requestAnimationFrame(frame);
+}
+
+function updateButton() {
+  button.textContent = paused ? '继续动画' : '暂停动画';
+}
+
+button.addEventListener('click', () => {
+  paused = !paused;
+  updateButton();
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+updateButton();
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

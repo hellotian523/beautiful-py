@@ -13,7 +13,7 @@
 
 ---
 
-## 📂 作品目录（共 40 个精选与原创展示）
+## 📂 作品目录（共 41 个精选与原创展示）
 
 
 ### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
@@ -26,6 +26,7 @@
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点 / 原作者说明 |
 | :--- | :--- | :--- |
+| **莫比乌斯织带** | [`web/mobius-ribbon/index.html`](web/mobius-ribbon/index.html) | 一条半扭转的彩带在空间里翻转，条纹沿单侧曲面流动。 |
 | **流光玻璃** | [`web/voronoi-glass/index.html`](web/voronoi-glass/index.html) | 不规则玻璃片拼成彩窗，亮色缓慢掠过每块玻璃。 |
 | **极光帷幕** | [`web/aurora-curtain/index.html`](web/aurora-curtain/index.html) | 青绿与紫色的极光在星空下舒卷，层叠光丝组成流动的天幕。 |
 | **闪电三角洲** | [`web/lightning-delta/index.html`](web/lightning-delta/index.html) | 蓝紫色电流沿分形树枝由中心向外传播，像夜色中亮起的河流三角洲。 |
