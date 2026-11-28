@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "paper_wind",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "折纸风阵",
+      "desc": "一排排双色纸片向风倾斜，折面随波依次翻转。",
+      "url": "web/paper-wind/index.html",
+      "icon": "🪁"
+    },
+    {
       "id": "hilbert_light",
       "type": "web",
       "tag": "Web Canvas · 原创",

@@ -13,7 +13,7 @@
 
 ---
 
-## 📂 作品目录（共 47 个精选与原创展示）
+## 📂 作品目录（共 48 个精选与原创展示）
 
 
 ### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
@@ -26,6 +26,7 @@
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点 / 原作者说明 |
 | :--- | :--- | :--- |
+| **折纸风阵** | [`web/paper-wind/index.html`](web/paper-wind/index.html) | 一排排双色纸片向风倾斜，折面随波依次翻转。 |
 | **希尔伯特光径** | [`web/hilbert-light/index.html`](web/hilbert-light/index.html) | 一束光沿曲折的希尔伯特曲线行进，依次经过方格中的每个位置。 |
 | **雨夜列车** | [`web/night-train/index.html`](web/night-train/index.html) | 湿润车窗前雨痕下落，远处楼灯与近处立柱以不同速度掠过。 |
 | **等高线岛屿** | [`web/contour-island/index.html`](web/contour-island/index.html) | 青绿色等高线围成海岛，琥珀色光带缓缓扫过地形。 |
