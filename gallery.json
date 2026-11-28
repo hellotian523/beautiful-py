@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "hilbert_light",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "希尔伯特光径",
+      "desc": "一束光沿曲折的希尔伯特曲线行进，依次经过方格中的每个位置。",
+      "url": "web/hilbert-light/index.html",
+      "icon": "➰"
+    },
+    {
       "id": "night_train",
       "type": "web",
       "tag": "Web Canvas · 原创",

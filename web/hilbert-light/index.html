@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>希尔伯特光径</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #080e1c; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #bacbe0; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #152840; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>希尔伯特光径</h1>
+  <p>一束光沿曲折的希尔伯特曲线行进，依次经过方格中的每个位置。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="一束光沿曲折的希尔伯特曲线行进，依次经过方格中的每个位置。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+let request;
+const background = ctx.createRadialGradient(450, 450, 50, 450, 450, 450);
+background.addColorStop(0, '#1c2945');
+background.addColorStop(1, '#080e1c');
+
+function hilbert(order) {
+  if (order === 0) return [[0, 0]];
+  const half = 2 ** (order - 1);
+  const smaller = hilbert(order - 1);
+  return [
+    ...smaller.map(([x, y]) => [y, x]),
+    ...smaller.map(([x, y]) => [x, y + half]),
+    ...smaller.map(([x, y]) => [x + half, y + half]),
+    ...smaller.map(([x, y]) => [2 * half - 1 - y, half - 1 - x])
+  ];
+}
+const path = hilbert(5).map(([x, y]) => [78 + x * 24, 78 + y * 24]);
+
+function draw() {
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (const point of path) ctx.lineTo(...point);
+  ctx.strokeStyle = '#374167';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  const head = 165 + time * 125 % (path.length + 165);
+  for (let i = 1; i < path.length; i++) {
+    const distance = head - i;
+    if (distance < 0 || distance > 165) continue;
+    const light = 1 - distance / 165;
+    ctx.beginPath();
+    ctx.moveTo(...path[i - 1]);
+    ctx.lineTo(...path[i]);
+    ctx.strokeStyle = `hsl(${271 - light * 97} 94% ${40 + light * 45}%)`;
+    ctx.lineWidth = 3 + 5 * light;
+    ctx.stroke();
+  }
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  request = requestAnimationFrame(frame);
+}
+
+function updateButton() {
+  button.textContent = paused ? '继续动画' : '暂停动画';
+}
+
+button.addEventListener('click', () => {
+  paused = !paused;
+  updateButton();
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+updateButton();
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>
