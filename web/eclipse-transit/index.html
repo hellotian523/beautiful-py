@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日食掠影</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070a16; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #b9c9dc; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #162941; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>日食掠影</h1>
+  <p>月面缓缓掠过日轮，纤细的日冕和弧形日面随遮挡显现。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="月面缓缓掠过日轮，纤细的日冕和弧形日面随遮挡显现。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+let request;
+const background = ctx.createRadialGradient(450, 450, 40, 450, 450, 457);
+background.addColorStop(0, '#181d36');
+background.addColorStop(1, '#070a16');
+
+const stars = Array.from({ length: 100 }, (_, i) => [
+  35 + 830 * ((i * .618033989) % 1),
+  35 + 830 * ((i * .414213562) % 1),
+  .5 + i % 4 * .36
+]);
+
+function draw() {
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  ctx.fillStyle = '#b4c7e5';
+  for (const [x, y, radius] of stars) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 290; i++) {
+    const angle = i * Math.PI / 145;
+    const reach = 46 + 55 * Math.cos(angle * 2.0) ** 2 + 31 * Math.sin(i * 8.13) ** 2;
+    const x = Math.cos(angle), y = Math.sin(angle);
+    ctx.beginPath();
+    ctx.moveTo(450 + x * 184, 450 + y * 184);
+    ctx.quadraticCurveTo(450 + x * 210 - y * 12, 450 + y * 210 + x * 12, 450 + x * (184 + reach), 450 + y * (184 + reach));
+    ctx.strokeStyle = `rgba(255, 156, 87, ${.07 + .04 * Math.sin(time + i)})`;
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  const sun = ctx.createRadialGradient(410, 400, 12, 450, 450, 191);
+  sun.addColorStop(0, '#fff2b7');
+  sun.addColorStop(.82, '#f9b84d');
+  sun.addColorStop(1, '#f66e35');
+  ctx.fillStyle = sun;
+  ctx.beginPath();
+  ctx.arc(450, 450, 191, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(450 + 286 * Math.sin(time * .24 - .6), 438, 195, 0, Math.PI * 2);
+  ctx.fillStyle = '#090b17';
+  ctx.fill();
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  request = requestAnimationFrame(frame);
+}
+
+function updateButton() {
+  button.textContent = paused ? '继续动画' : '暂停动画';
+}
+
+button.addEventListener('click', () => {
+  paused = !paused;
+  updateButton();
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+updateButton();
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

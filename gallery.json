@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "eclipse_transit",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "日食掠影",
+      "desc": "月面缓缓掠过日轮，纤细的日冕和弧形日面随遮挡显现。",
+      "url": "web/eclipse-transit/index.html",
+      "icon": "🌘"
+    },
+    {
       "id": "truchet_tides",
       "type": "web",
       "tag": "Web Canvas · 原创",
