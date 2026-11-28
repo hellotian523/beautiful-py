@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>等高线岛屿</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #080e1c; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #bacbe0; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #152840; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>等高线岛屿</h1>
+  <p>青绿色等高线围成海岛，琥珀色光带缓缓扫过地形。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="青绿色等高线围成海岛，琥珀色光带缓缓扫过地形。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+let request;
+const background = ctx.createRadialGradient(450, 450, 50, 450, 450, 450);
+background.addColorStop(0, '#1c2945');
+background.addColorStop(1, '#080e1c');
+
+function draw() {
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  for (let ring = 0; ring < 39; ring++) {
+    const radius = 24 + ring * 8.6;
+    const light = (.5 + .5 * Math.cos(ring * .23 - time * 1.6)) ** 7;
+    ctx.beginPath();
+    for (let i = 0; i <= 240; i++) {
+      const angle = i * Math.PI / 120;
+      const ridge = 1 + .17 * Math.sin(3 * angle + radius * .006)
+        + .10 * Math.cos(5 * angle - radius * .008) + .04 * Math.sin(11 * angle);
+      ctx.lineTo(450 + Math.cos(angle) * radius * ridge, 450 + Math.sin(angle) * radius * ridge * .87);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = `hsl(${166 - light * 123} 69% ${32 + light * 42}%)`;
+    ctx.lineWidth = ring % 5 === 0 ? 2.6 : 1.5;
+    ctx.stroke();
+  }
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  request = requestAnimationFrame(frame);
+}
+
+function updateButton() {
+  button.textContent = paused ? '继续动画' : '暂停动画';
+}
+
+button.addEventListener('click', () => {
+  paused = !paused;
+  updateButton();
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+updateButton();
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

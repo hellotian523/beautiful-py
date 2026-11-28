@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "contour_island",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "等高线岛屿",
+      "desc": "青绿色等高线围成海岛，琥珀色光带缓缓扫过地形。",
+      "url": "web/contour-island/index.html",
+      "icon": "🗺️"
+    },
+    {
       "id": "eclipse_transit",
       "type": "web",
       "tag": "Web Canvas · 原创",

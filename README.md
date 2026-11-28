@@ -13,7 +13,7 @@
 
 ---
 
-## 📂 作品目录（共 44 个精选与原创展示）
+## 📂 作品目录（共 45 个精选与原创展示）
 
 
 ### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
@@ -26,6 +26,7 @@
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点 / 原作者说明 |
 | :--- | :--- | :--- |
+| **等高线岛屿** | [`web/contour-island/index.html`](web/contour-island/index.html) | 青绿色等高线围成海岛，琥珀色光带缓缓扫过地形。 |
 | **日食掠影** | [`web/eclipse-transit/index.html`](web/eclipse-transit/index.html) | 月面缓缓掠过日轮，纤细的日冕和弧形日面随遮挡显现。 |
 | **潮线拼砖** | [`web/truchet-tides/index.html`](web/truchet-tides/index.html) | 黑金方砖铺满弧线，流动高光穿过一段段相接的圆弧。 |
 | **共振砂纹** | [`web/chladni-sand/index.html`](web/chladni-sand/index.html) | 沙粒在几种驻波结点图案之间缓缓迁移，重排成对称纹路。 |
