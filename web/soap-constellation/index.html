@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>虹彩泡群</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #080e1c; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #bacbe0; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #152840; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>虹彩泡群</h1>
+  <p>大小不同的肥皂泡轻轻浮动，边缘随光线转出不同色彩。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="大小不同的肥皂泡轻轻浮动，边缘随光线转出不同色彩。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+let request;
+const background = ctx.createRadialGradient(450, 450, 50, 450, 450, 450);
+background.addColorStop(0, '#1c2945');
+background.addColorStop(1, '#080e1c');
+
+const bubbles = [
+  [430, 400, 156], [660, 474, 110], [253, 552, 107], [311, 253, 87],
+  [550, 649, 76], [630, 235, 64], [163, 350, 53], [755, 335, 49],
+  [187, 686, 36], [719, 662, 32], [474, 184, 29], [373, 701, 37]
+];
+
+function draw() {
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  for (const [i, [centerX, centerY, radius]] of bubbles.entries()) {
+    const x = centerX + 18 * Math.cos(time * .63 + i * 2);
+    const y = centerY + 23 * Math.sin(time * .73 + i);
+    const rim = ctx.createConicGradient(time * .46 + i, x, y);
+    for (const [index, color] of ['#85f8f3', '#da95fc', '#ed9b92', '#f8e49f', '#81afff', '#85f8f3'].entries()) {
+      rim.addColorStop(index / 5, color);
+    }
+    const film = ctx.createRadialGradient(x - radius * .22, y - radius * .31, 10, x, y, radius);
+    film.addColorStop(0, 'rgba(37, 35, 81, .2)');
+    film.addColorStop(.76, 'rgba(42, 46, 100, .28)');
+    film.addColorStop(1, 'rgba(140, 119, 224, .55)');
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = film;
+    ctx.fill();
+    ctx.strokeStyle = rim;
+    ctx.lineWidth = 2.8;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x, y, radius * .87, 3.8, 4.73);
+    ctx.strokeStyle = 'rgba(235, 247, 255, .62)';
+    ctx.lineWidth = Math.max(2, radius * .034);
+    ctx.stroke();
+  }
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  request = requestAnimationFrame(frame);
+}
+
+function updateButton() {
+  button.textContent = paused ? '继续动画' : '暂停动画';
+}
+
+button.addEventListener('click', () => {
+  paused = !paused;
+  updateButton();
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+updateButton();
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

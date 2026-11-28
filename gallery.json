@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "soap_constellation",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "虹彩泡群",
+      "desc": "大小不同的肥皂泡轻轻浮动，边缘随光线转出不同色彩。",
+      "url": "web/soap-constellation/index.html",
+      "icon": "🫧"
+    },
+    {
       "id": "paper_wind",
       "type": "web",
       "tag": "Web Canvas · 原创",
