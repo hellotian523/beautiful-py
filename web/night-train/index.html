@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>雨夜列车</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #080e1c; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #bacbe0; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #152840; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>雨夜列车</h1>
+  <p>湿润车窗前雨痕下落，远处楼灯与近处立柱以不同速度掠过。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="湿润车窗前雨痕下落，远处楼灯与近处立柱以不同速度掠过。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+let request;
+const background = ctx.createRadialGradient(450, 450, 50, 450, 450, 450);
+background.addColorStop(0, '#1c2945');
+background.addColorStop(1, '#080e1c');
+
+const buildings = Array.from({length: 24}, (_, i) => 66 + (i * 79 % 270));
+const drops = Array.from({length: 170}, (_, i) => [i * 137.507 % 900, i * 251.3 % 900, 9 + i % 29]);
+
+function draw() {
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  const skyline = ctx.createLinearGradient(0, 150, 0, 740);
+  skyline.addColorStop(0, '#0b1632');
+  skyline.addColorStop(1, '#553355');
+  ctx.fillStyle = skyline;
+  ctx.fillRect(0, 0, 900, 740);
+
+  for (const [i, height] of buildings.entries()) {
+    const x = (i * 55 - time * 39 % 1320 + 1320) % 1320 - 70;
+    const top = 605 - height;
+    ctx.fillStyle = i % 3 === 0 ? '#212543' : '#171e39';
+    ctx.fillRect(x, top, 48, 605 - top);
+    for (let row = 0; row < Math.floor(height / 21); row++) {
+      for (let column = 0; column < 3; column++) {
+        if ((row * 17 + column * 7 + i * 11) % 9 > 5) continue;
+        ctx.fillStyle = (column + i) % 3 === 0 ? '#6ed3dd' : '#ffd28c';
+        ctx.fillRect(x + 7 + column * 12, top + 9 + row * 21, 5, 7);
+        ctx.globalAlpha = .13;
+        ctx.fillRect(x + 7 + column * 12, 615 + row * 4, 5, 35);
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+  ctx.fillStyle = '#131525';
+  for (let i = 0; i < 4; i++) ctx.fillRect((i * 310 - time * 168 % 1240 + 1240) % 1240 - 130, 0, 13, 765);
+  for (const [x, y, length] of drops) {
+    const fall = (y + time * (108 + length * 2)) % 900;
+    ctx.beginPath();
+    ctx.moveTo(x, fall);
+    ctx.lineTo(x - length * .38, fall + length);
+    ctx.strokeStyle = 'rgba(172, 214, 255, .38)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+  ctx.strokeStyle = '#0b0e1c';
+  ctx.lineWidth = 48;
+  ctx.beginPath();
+  ctx.roundRect(25, 118, 850, 650, 60);
+  ctx.stroke();
+  ctx.fillStyle = '#0b0e1c';
+  ctx.fillRect(0, 0, 900, 118);
+  ctx.fillRect(0, 770, 900, 130);
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  request = requestAnimationFrame(frame);
+}
+
+function updateButton() {
+  button.textContent = paused ? '继续动画' : '暂停动画';
+}
+
+button.addEventListener('click', () => {
+  paused = !paused;
+  updateButton();
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+updateButton();
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

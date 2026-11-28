@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "night_train",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "雨夜列车",
+      "desc": "湿润车窗前雨痕下落，远处楼灯与近处立柱以不同速度掠过。",
+      "url": "web/night-train/index.html",
+      "icon": "🚆"
+    },
+    {
       "id": "contour_island",
       "type": "web",
       "tag": "Web Canvas · 原创",
