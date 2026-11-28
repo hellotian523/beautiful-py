@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>极光帷幕</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070a16; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #b9c9dc; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #162941; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>极光帷幕</h1>
+  <p>青绿与紫色的极光在星空下舒卷，层叠光丝组成流动的天幕。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="青绿与紫色的极光在星空下舒卷，层叠光丝组成流动的天幕。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+const background = ctx.createRadialGradient(450, 450, 30, 450, 450, 450);
+background.addColorStop(0, '#191e38');
+background.addColorStop(1, '#070a16');
+
+
+function draw() {
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  for (let i = 0; i < 120; i++) {
+    const x = (i * 347 % 900);
+    const y = (i * 173 % 620);
+    ctx.fillStyle = 'rgba(210,230,255,.55)';
+    ctx.fillRect(x, y, 1.5, 1.5);
+  }
+  ctx.globalCompositeOperation = 'lighter';
+  for (let layer = 0; layer < 5; layer++) {
+    for (let i = 0; i < 230; i++) {
+      const x = 40 + i * 3.6;
+      const y = 360 + layer * 42 + 75 * Math.sin(i * .022 + time * .45 + layer * .5)
+        + 26 * Math.sin(i * .061 - time * .7);
+      const height = 90 + 65 * Math.sin(i * .017 + layer + time * .3);
+      const glow = ctx.createLinearGradient(x, y - height, x, y + 70);
+      glow.addColorStop(0, 'transparent');
+      glow.addColorStop(.65, `hsla(${145 + layer * 28} 95% 65% / .13)`);
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow;
+      ctx.fillRect(x, y - height, 3, height + 70);
+    }
+  }
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  if (!paused) request = requestAnimationFrame(frame);
+}
+let request;
+button.addEventListener('click', () => {
+  paused = !paused;
+  button.textContent = paused ? '继续动画' : '暂停动画';
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+button.textContent = paused ? '继续动画' : '暂停动画';
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "aurora_curtain",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "极光帷幕",
+      "desc": "青绿与紫色的极光在星空下舒卷，层叠光丝组成流动的天幕。",
+      "url": "web/aurora-curtain/index.html",
+      "icon": "🌌"
+    },
+    {
       "id": "lightning_delta",
       "type": "web",
       "tag": "Web Canvas · 原创",
