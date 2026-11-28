@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>潮线拼砖</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070a16; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #b9c9dc; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #162941; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>潮线拼砖</h1>
+  <p>黑金方砖铺满弧线，流动高光穿过一段段相接的圆弧。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="黑金方砖铺满弧线，流动高光穿过一段段相接的圆弧。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+let request;
+const background = ctx.createRadialGradient(450, 450, 40, 450, 450, 457);
+background.addColorStop(0, '#181d36');
+background.addColorStop(1, '#070a16');
+
+const tiles = Array.from({ length: 100 }, (_, i) => Math.sin(i * 12.9898) >= 0);
+
+function draw() {
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  const size = 72;
+  for (const [i, flip] of tiles.entries()) {
+    const x = 90 + (i % 10) * size, y = 90 + Math.floor(i / 10) * size;
+    ctx.fillStyle = i % 2 ? '#152233' : '#101a2a';
+    ctx.fillRect(x, y, size, size);
+    for (let side = 0; side < 2; side++) {
+      const cx = x + side * size;
+      const cy = y + (flip ? 1 - side : side) * size;
+      const angle = (flip ? 3 : 0) * Math.PI / 2 + side * Math.PI;
+      const shine = (.5 + .5 * Math.cos((x + y) * .023 - time * 2.5)) ** 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, size / 2, angle, angle + Math.PI / 2);
+      ctx.lineWidth = 11;
+      ctx.strokeStyle = `hsl(39 73% ${27 + shine * 44}%)`;
+      ctx.stroke();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = `hsl(48 90% ${49 + shine * 42}%)`;
+      ctx.stroke();
+    }
+  }
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  request = requestAnimationFrame(frame);
+}
+
+function updateButton() {
+  button.textContent = paused ? '继续动画' : '暂停动画';
+}
+
+button.addEventListener('click', () => {
+  paused = !paused;
+  updateButton();
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+updateButton();
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

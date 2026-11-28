@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "truchet_tides",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "潮线拼砖",
+      "desc": "黑金方砖铺满弧线，流动高光穿过一段段相接的圆弧。",
+      "url": "web/truchet-tides/index.html",
+      "icon": "🧩"
+    },
+    {
       "id": "chladni_sand",
       "type": "web",
       "tag": "Web Canvas · 原创",
