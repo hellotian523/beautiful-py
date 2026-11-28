@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "voronoi_glass",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "流光玻璃",
+      "desc": "不规则玻璃片拼成彩窗，亮色缓慢掠过每块玻璃。",
+      "url": "web/voronoi-glass/index.html",
+      "icon": "🟪"
+    },
+    {
       "id": "aurora_curtain",
       "type": "web",
       "tag": "Web Canvas · 原创",

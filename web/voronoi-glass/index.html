@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>流光玻璃</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070a16; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #b9c9dc; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #162941; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>流光玻璃</h1>
+  <p>不规则玻璃片拼成彩窗，亮色缓慢掠过每块玻璃。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="不规则玻璃片拼成彩窗，亮色缓慢掠过每块玻璃。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+let request;
+const background = ctx.createRadialGradient(450, 450, 40, 450, 450, 457);
+background.addColorStop(0, '#181d36');
+background.addColorStop(1, '#070a16');
+
+const sites = Array.from({ length: 52 }, (_, i) => [
+  70 + 760 * ((i * .61803398875) % 1),
+  70 + 760 * ((i * .754877666) % 1)
+]);
+
+// Clip each pane to the half-plane nearer its own site than the next site.
+const panes = sites.map(([x, y]) => {
+  let polygon = [[50, 70], [850, 70], [850, 830], [50, 830]];
+  for (const [sx, sy] of sites) {
+    if (sx === x && sy === y) continue;
+    const side = ([px, py]) => (px - (x + sx) / 2) * (sx - x) + (py - (y + sy) / 2) * (sy - y);
+    polygon = polygon.flatMap((a, i) => {
+      const b = polygon[(i + 1) % polygon.length];
+      const u = side(a), v = side(b);
+      const points = u <= 0 ? [a] : [];
+      if ((u <= 0) !== (v <= 0)) {
+        const t = u / (u - v);
+        points.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+      }
+      return points;
+    });
+  }
+  const path = new Path2D();
+  for (const point of polygon) path.lineTo(...point);
+  path.closePath();
+  return path;
+});
+
+function draw() {
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(50, 70, 800, 760, 125);
+  ctx.clip();
+  for (const [i, pane] of panes.entries()) {
+    const [x, y] = sites[i];
+    const hue = [272, 181, 212, 331, 38][i % 5];
+    const light = 42 + 25 * Math.cos(x * .009 + y * .004 - time * 1.5);
+    const glass = ctx.createLinearGradient(x - 75, y - 75, x + 75, y + 75);
+    glass.addColorStop(0, `hsl(${hue} 78% ${light + 15}%)`);
+    glass.addColorStop(1, `hsl(${hue + 18} 78% ${light}%)`);
+    ctx.fillStyle = glass;
+    ctx.fill(pane);
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = '#0c0c20';
+    ctx.stroke(pane);
+  }
+  ctx.restore();
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  request = requestAnimationFrame(frame);
+}
+
+function updateButton() {
+  button.textContent = paused ? '继续动画' : '暂停动画';
+}
+
+button.addEventListener('click', () => {
+  paused = !paused;
+  updateButton();
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+updateButton();
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>
