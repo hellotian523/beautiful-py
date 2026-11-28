@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>共振砂纹</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070a16; color: #e8f3ff; font: 16px system-ui, sans-serif; }
+  header { padding: 1rem 1.25rem; }
+  h1 { margin: 0; font-size: 1.4rem; }
+  p { margin: .5rem 0; color: #b9c9dc; }
+  button { font: inherit; color: inherit; padding: .4rem .85rem; background: #162941; border: 1px solid #82a5ca; border-radius: .4rem; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #ffe0a0; outline-offset: 3px; }
+  canvas { display: block; width: min(100%, 74svh, 850px); height: auto; margin: auto; }
+</style>
+<header>
+  <h1>共振砂纹</h1>
+  <p>沙粒在几种驻波结点图案之间缓缓迁移，重排成对称纹路。</p>
+  <button type="button">暂停动画</button>
+</header>
+<canvas width="900" height="900" role="img" aria-label="沙粒在几种驻波结点图案之间缓缓迁移，重排成对称纹路。"></canvas>
+<script>
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const button = document.querySelector('button');
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let time = 0;
+let previous = null;
+let request;
+const background = ctx.createRadialGradient(450, 450, 40, 450, 450, 457);
+background.addColorStop(0, '#181d36');
+background.addColorStop(1, '#070a16');
+
+// Sample locations where the rectangular plate mode is close to zero.
+function sampleMode(m, n) {
+  const grains = [];
+  for (let y = 0; y <= 150; y++) {
+    for (let x = 0; x <= 150; x++) {
+      const a = Math.PI * x / 150, b = Math.PI * y / 150;
+      const amplitude = Math.cos(m * a) * Math.cos(n * b) - Math.cos(n * a) * Math.cos(m * b);
+      if (Math.abs(amplitude) < .038) grains.push([x, y]);
+    }
+  }
+  return Array.from({ length: 1900 }, (_, i) => grains[Math.floor(i * grains.length / 1900)]);
+}
+const modes = [[3, 5], [4, 7], [5, 6]].map(pair => sampleMode(...pair));
+
+function draw() {
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, 900, 900);
+  ctx.fillStyle = '#171124';
+  ctx.fillRect(92, 92, 716, 716);
+  ctx.strokeStyle = '#8b5c85';
+  ctx.strokeRect(92, 92, 716, 716);
+  const cycle = time / 5;
+  const mode = Math.floor(cycle) % modes.length;
+  const transition = Math.max(0, (cycle % 1 - .46) / .54);
+  const blend = transition * transition * (3 - 2 * transition);
+  for (let i = 0; i < modes[mode].length; i++) {
+    const [ax, ay] = modes[mode][i];
+    const [bx, by] = modes[(mode + 1) % modes.length][i];
+    const x = 108 + 4.55 * (ax + (bx - ax) * blend);
+    const y = 108 + 4.55 * (ay + (by - ay) * blend);
+    const grain = 1.2 + .8 * (1 + Math.sin(i * 9.1 + time * 2));
+    ctx.fillStyle = i % 4 === 0 ? '#f8c5bc' : '#db8b55';
+    ctx.fillRect(x, y, grain, grain);
+  }
+}
+
+function frame(now) {
+  if (previous !== null) time += Math.min((now - previous) / 1000, .05);
+  previous = now;
+  draw();
+  request = requestAnimationFrame(frame);
+}
+
+function updateButton() {
+  button.textContent = paused ? '继续动画' : '暂停动画';
+}
+
+button.addEventListener('click', () => {
+  paused = !paused;
+  updateButton();
+  if (paused) {
+    cancelAnimationFrame(request);
+  } else {
+    previous = null;
+    request = requestAnimationFrame(frame);
+  }
+});
+updateButton();
+draw();
+if (!paused) request = requestAnimationFrame(frame);
+</script>
+</html>

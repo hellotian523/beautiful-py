@@ -13,7 +13,7 @@
 
 ---
 
-## 📂 作品目录（共 41 个精选与原创展示）
+## 📂 作品目录（共 42 个精选与原创展示）
 
 
 ### 🌌 殿堂级开源 WebGL / GPGPU 视觉模拟（MIT 协议完整收录）
@@ -26,6 +26,7 @@
 ### 🌐 Web 交互视觉展示（支持 GitHub Pages 在线运行）
 | 作品 | 路径 | 亮点 / 原作者说明 |
 | :--- | :--- | :--- |
+| **共振砂纹** | [`web/chladni-sand/index.html`](web/chladni-sand/index.html) | 沙粒在几种驻波结点图案之间缓缓迁移，重排成对称纹路。 |
 | **莫比乌斯织带** | [`web/mobius-ribbon/index.html`](web/mobius-ribbon/index.html) | 一条半扭转的彩带在空间里翻转，条纹沿单侧曲面流动。 |
 | **流光玻璃** | [`web/voronoi-glass/index.html`](web/voronoi-glass/index.html) | 不规则玻璃片拼成彩窗，亮色缓慢掠过每块玻璃。 |
 | **极光帷幕** | [`web/aurora-curtain/index.html`](web/aurora-curtain/index.html) | 青绿与紫色的极光在星空下舒卷，层叠光丝组成流动的天幕。 |

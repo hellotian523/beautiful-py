@@ -1,6 +1,15 @@
 {
   "web": [
     {
+      "id": "chladni_sand",
+      "type": "web",
+      "tag": "Web Canvas · 原创",
+      "title": "共振砂纹",
+      "desc": "沙粒在几种驻波结点图案之间缓缓迁移，重排成对称纹路。",
+      "url": "web/chladni-sand/index.html",
+      "icon": "⌛"
+    },
+    {
       "id": "mobius_ribbon",
       "type": "web",
       "tag": "Web Canvas · 原创",
